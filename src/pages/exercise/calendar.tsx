@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parse } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { DailyExercise } from '@/src/db/model';
+import { DailyExercise } from '@/src/service/exercise/model';
 
 interface CalendarProps {
   records: DailyExercise[];

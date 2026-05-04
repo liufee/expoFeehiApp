@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { format, parse, isValid } from 'date-fns';
-import { exerciseService } from '@/src/service/exercise';
-import { RecordType, Status } from '@/src/db/model';
+import { exerciseService } from '@/src/service/exercise/exercise';
+import { RecordType, Status } from '@/src/service/exercise/model';
 import { formatTime } from './utils';
 
 const PROGRESS_KEY_LAST_HAND_INPUT_START_TIME = 'last_hand_input_run_start_time';
@@ -102,8 +102,6 @@ export default function RunScreen() {
         paths: [],
       },
       sitUpPushUp: {} as any,
-      tsr: 1,
-      tsrVerified: 1,
     };
 
     try {

@@ -1,15 +1,26 @@
 import * as SQLite from 'expo-sqlite';
-import { Record, RecordType } from './model';
 
 export class ExerciseDatabase {
   private db: SQLite.SQLiteDatabase | null = null;
 
   async init() {
     try {
+      console.log('开始初始化数据库...');
       this.db = await SQLite.openDatabaseAsync('exercise.db');
+      console.log('数据库打开成功');
+      
+      if (!this.db) {
+        throw new Error('数据库对象为 null');
+      }
+      
       await this.createTables();
+      console.log('表创建成功');
+      
+      await this.migrateTables();
+      console.log('数据库迁移完成');
     } catch (error) {
       console.error('Failed to initialize database:', error);
+      this.db = null; // 确保 db 为 null，避免后续使用
       throw error;
     }
   }
@@ -25,113 +36,153 @@ export class ExerciseDatabase {
         end_at TEXT NOT NULL,
         status INTEGER NOT NULL,
         ext TEXT DEFAULT '',
-        tsr TEXT DEFAULT '',
-        tsr_type TEXT DEFAULT 'exercise',
-        paths TEXT DEFAULT ''
+        paths TEXT DEFAULT '',
+        tsr TEXT DEFAULT ''
+      );
+    `);
+
+    await this.db.execAsync(`
+      CREATE TABLE IF NOT EXISTS tsr (
+        type TEXT,
+        third_id TEXT,
+        tsr TEXT,
+        PRIMARY KEY (type, third_id)
       );
     `);
   }
 
-  async saveRecord(record: Omit<Record, 'id'>): Promise<string> {
+  private async migrateTables() {
+    if (!this.db) return;
+
+    try {
+      // 检查 records 表是否有 tsr 字段
+      const tableInfo = await this.db.getAllAsync('PRAGMA table_info(records)');
+      const hasTsrColumn = (tableInfo as any[]).some((col: any) => col.name === 'tsr');
+
+      if (!hasTsrColumn) {
+        console.log('Adding tsr column to records table...');
+        await this.db.execAsync('ALTER TABLE records ADD COLUMN tsr TEXT DEFAULT ""');
+        console.log('tsr column added successfully');
+      }
+    } catch (error) {
+      console.error('Migration error:', error);
+      // 如果字段已存在，ALTER TABLE 会失败，这是正常的
+    }
+  }
+
+  async saveRecord(record: any): Promise<string> {
     if (!this.db) throw new Error('Database not initialized');
 
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-    
-    let ext = '';
-    if (record.type === RecordType.RecordTypeSitUpPushUp) {
-      ext = `${record.sitUpPushUp.pushUp},${record.sitUpPushUp.sitUp},${record.sitUpPushUp.curlUp},${record.sitUpPushUp.legsUpTheWallPose}`;
-    } else if (record.type === RecordType.RecordTypeRun) {
-      ext = `${record.run.avgPace},${record.run.distance},${record.run.runDuration},${record.run.runningWithoutPosition}`;
-    }
-
-    let paths = '';
-    if (record.type === RecordType.RecordTypeRun && record.run.paths) {
-      paths = record.run.paths.map(p => 
-        `${p.latitude},${p.longitude},${new Date(p.time).toISOString().replace('T', ' ').split('.')[0]}`
-      ).join(';');
-    }
 
     await this.db.runAsync(
-      'INSERT INTO records (id, type, start_at, end_at, status, ext, tsr, tsr_type, paths) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [id, record.type, record.startAt, record.endAt, record.status, ext, record.tsr || '', 'exercise', paths]
+      'INSERT INTO records (id, type, start_at, end_at, status, ext, paths, tsr) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [id, record.type, record.start_at, record.end_at, record.status, record.ext, record.paths, record.tsr || '']
     );
+
+    // 保存 TSR 到单独的表
+    if (record.tsr && record.tsr !== '') {
+      await this.db.runAsync(
+        'INSERT INTO tsr (type, third_id, tsr) VALUES (?, ?, ?)',
+        [record.tsrType, id, record.tsr]
+      );
+    }
 
     return id;
   }
 
-  async updateRecord(id: string, record: Partial<Record>): Promise<void> {
+  async updateRecord(id: string, record: any): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
-
-    let ext = '';
-    if (record.sitUpPushUp) {
-      ext = `${record.sitUpPushUp.pushUp},${record.sitUpPushUp.sitUp},${record.sitUpPushUp.curlUp},${record.sitUpPushUp.legsUpTheWallPose}`;
-    } else if (record.run) {
-      ext = `${record.run.avgPace},${record.run.distance},${record.run.runDuration},${record.run.runningWithoutPosition}`;
-    }
-
-    const startAt = record.startAt || '';
-    const endAt = record.endAt || '';
-    const status = record.status !== undefined ? record.status : 0;
 
     await this.db.runAsync(
-      'UPDATE records SET start_at = ?, end_at = ?, status = ?, ext = ? WHERE id = ?',
-      [startAt, endAt, status, ext, id]
+      'UPDATE records SET start_at = ?, end_at = ?, status = ?, ext = ?, tsr = ? WHERE id = ?',
+      [record.start_at, record.end_at, record.status, record.ext, record.tsr || '', id]
     );
+
+    // 更新 TSR
+    if (record.tsr !== undefined) {
+      if (record.tsr === '') {
+        // 删除 TSR
+        await this.db.runAsync(
+          'DELETE FROM tsr WHERE type = ? AND third_id = ?',
+          [record.tsrType, id]
+        );
+      } else {
+        // 检查是否存在
+        const existing = await this.db.getAllAsync(
+          'SELECT type, third_id FROM tsr WHERE type = ? AND third_id = ?',
+          [record.tsrType, id]
+        );
+
+        if (existing.length > 0) {
+          // 更新
+          await this.db.runAsync(
+            'UPDATE tsr SET tsr = ? WHERE type = ? AND third_id = ?',
+            [record.tsr, record.tsrType, id]
+          );
+        } else {
+          // 插入
+          await this.db.runAsync(
+            'INSERT INTO tsr (type, third_id, tsr) VALUES (?, ?, ?)',
+            [record.tsrType, id, record.tsr]
+          );
+        }
+      }
+    }
   }
 
-  async deleteRecord(id: string): Promise<void> {
+  async deleteRecord(id: string, tsrType: string): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
     await this.db.runAsync('DELETE FROM records WHERE id = ?', [id]);
+    await this.db.runAsync('DELETE FROM tsr WHERE type = ? AND third_id = ?', [tsrType, id]);
   }
 
-  async getRecordsByTypes(types: RecordType[], limit: number = -1): Promise<any[]> {
-    if (!this.db) throw new Error('Database not initialized');
-
-    const typeStr = types.join(',');
-    let query = `SELECT * FROM records WHERE type IN (${typeStr}) ORDER BY start_at DESC`;
-    
-    if (limit > 0) {
-      query += ` LIMIT ${limit}`;
-    }
-
-    const result = await this.db.getAllAsync(query);
-    return result;
-  }
-
-  async getRecordsByPage(
-    types: RecordType[],
-    page: number,
-    perPage: number,
+  async getRecordsByType(
+    types: string[],
+    page: number = 1,
+    perPage: number = 10,
     startTime?: string,
     endTime?: string,
-    sortOrder: 'asc' | 'desc' = 'desc'
+    sortOrder: string = 'desc'
   ): Promise<any[]> {
     if (!this.db) throw new Error('Database not initialized');
 
-    const typeStr = types.join(',');
-    let query = `SELECT * FROM records WHERE type IN (${typeStr})`;
-    const params: any[] = [];
-
-    if (startTime) {
-      query += ' AND start_at >= ?';
-      params.push(startTime);
+    if (!['asc', 'desc'].includes(sortOrder.toLowerCase())) {
+      sortOrder = 'desc';
     }
 
+    const params: any[] = [];
+    const whereClauses: string[] = [];
+
+    // types
+    if (types.length > 0) {
+      const placeholders = types.map(() => '?').join(',');
+      whereClauses.push(`type IN (${placeholders})`);
+      params.push(...types);
+    }
+
+    // startTime / endTime
+    if (startTime) {
+      whereClauses.push('start_at >= ?');
+      params.push(startTime);
+    }
     if (endTime) {
-      query += ' AND start_at <= ?';
+      whereClauses.push('start_at <= ?');
       params.push(endTime);
     }
 
-    query += ` ORDER BY start_at ${sortOrder.toUpperCase()}`;
+    const whereSQL = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
-    if (perPage > 0) {
+    let query = `SELECT * FROM records ${whereSQL} ORDER BY start_at ${sortOrder.toUpperCase()}`;
+
+    if (page !== -1 && perPage > 0) {
+      const offset = (page - 1) * perPage;
       query += ' LIMIT ? OFFSET ?';
-      params.push(perPage);
-      params.push((page - 1) * perPage);
+      params.push(perPage, offset);
     }
 
     const result = await this.db.getAllAsync(query, params);
-    return result;
+    return result as any[];
   }
 
   async getRecordById(id: string): Promise<any> {
@@ -140,89 +191,19 @@ export class ExerciseDatabase {
     return result.length > 0 ? result[0] : null;
   }
 
-  private convertToRecord(row: any): Record {
-    const record: Record = {
-      id: row.id,
-      type: row.type,
-      startAt: row.start_at,
-      endAt: row.end_at,
-      status: row.status,
-      abdominal: {} as any,
-      run: {} as any,
-      sitUpPushUp: {} as any,
-      tsr: row.tsr || 0,
-      tsrVerified: 1,
-    };
-
-    if (row.type === RecordType.RecordTypeAbdominal) {
-      record.abdominal = {};
-    } else if (row.type === RecordType.RecordTypeSitUpPushUp) {
-      const ext = row.ext.split(',');
-      record.sitUpPushUp = {
-        pushUp: parseInt(ext[0]) || 0,
-        sitUp: parseInt(ext[1]) || 0,
-        curlUp: parseInt(ext[2]) || 0,
-        legsUpTheWallPose: parseInt(ext[3]) || 0,
-      };
-    } else if (row.type === RecordType.RecordTypeRun) {
-      const ext = row.ext.split(',');
-      let paths: any[] = [];
-      
-      if (row.paths) {
-        const lines = row.paths.split(';');
-        paths = lines.map((line: string) => {
-          const parts = line.split(',');
-          return {
-            latitude: parseFloat(parts[0]),
-            longitude: parseFloat(parts[1]),
-            time: new Date(parts[2]).getTime(),
-          };
-        });
-      }
-
-      record.run = {
-        avgPace: parseFloat(ext[0]) || 0,
-        distance: parseFloat(ext[1]) || 0,
-        runDuration: ext[2] || '',
-        runningWithoutPosition: parseInt(ext[3]) || 0,
-        paths: paths,
-      };
-    }
-
-    return record;
+  async getTSR(type: string, id: string): Promise<any> {
+    if (!this.db) throw new Error('Database not initialized');
+    const result = await this.db.getAllAsync(
+      'SELECT * FROM tsr WHERE type = ? AND third_id = ?',
+      [type, id]
+    );
+    return result.length > 0 ? result[0] : null;
   }
 
-  async getDailyExercises(
-    types: RecordType[],
-    startTime: string,
-    endTime: string,
-    sortOrder: 'asc' | 'desc' = 'asc'
-  ) {
-    const rows = await this.getRecordsByPage(types, 1, -1, startTime, endTime, sortOrder);
-    const records = rows.map(row => this.convertToRecord(row));
-
-    // Group by date
-    const groupedData: any = {};
-    records.forEach((record: Record) => {
-      const date = record.startAt.split(' ')[0];
-      if (!groupedData[date]) {
-        groupedData[date] = [];
-      }
-      groupedData[date].push(record);
-    });
-
-    const dailyExercises = Object.keys(groupedData).map(date => {
-      const exercises = groupedData[date];
-      const completedTypes = new Set(exercises.map((r: Record) => r.type)).size;
-      return {
-        date,
-        exercises,
-        completedTypes,
-        allCompleted: completedTypes === 3,
-      };
-    });
-
-    return dailyExercises;
+  async saveRunRecord(record: any): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+    // 如果需要单独的 run_records 表，可以在这里实现
+    // 当前项目中跑步记录存储在 records 表中
   }
 }
 

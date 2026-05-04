@@ -1,5 +1,3 @@
-// Exercise 数据模型
-
 export enum RecordType {
   RecordTypeAbdominal = 1,
   RecordTypeRun = 2,

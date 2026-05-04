@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { View, ActivityIndicator, Text } from 'react-native';
-import { exerciseService } from '@/src/service/exercise';
+import { exerciseService } from '@/src/service/exercise/exercise';
 
 
 export default function ExerciseLayout() {

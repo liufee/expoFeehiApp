@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, Text, TextInput, View, StyleSheet } from 'react-native';
 import { addMinutes, format, isValid, parse } from 'date-fns';
-import { exerciseService } from '@/src/service/exercise';
-import { Record, RecordType, Status } from '@/src/db/model';
+import { exerciseService } from '@/src/service/exercise/exercise';
+import { Record, RecordType, Status } from '@/src/service/exercise/model';
 
 export default function SitupScreen() {
   const now = new Date();
@@ -30,6 +30,7 @@ export default function SitupScreen() {
       );
 
       if (!success) {
+        console.error('获取力量记录失败:', error);
         Alert.alert('失败', error);
         return;
       }
@@ -49,6 +50,7 @@ export default function SitupScreen() {
         });
       }
     } catch (error) {
+      console.error('获取力量记录异常:', error);
       Alert.alert('失败', '获取记录失败');
     }
   };
@@ -78,14 +80,13 @@ export default function SitupScreen() {
       abdominal: {} as any,
       run: {} as any,
       sitUpPushUp: situpPushUp,
-      tsr: 0,
-      tsrVerified: 0,
     };
 
     try {
       if (existingRecordId) {
         const [success, error] = await exerciseService.updateRecord(existingRecordId, record);
         if (!success) {
+          console.error('更新力量记录失败:', error);
           Alert.alert('失败', error);
           return;
         }
@@ -93,6 +94,7 @@ export default function SitupScreen() {
       } else {
         const [success, error] = await exerciseService.saveRecord(record);
         if (!success) {
+          console.error('保存力量记录失败:', error);
           Alert.alert('失败', error);
           return;
         }
@@ -100,6 +102,7 @@ export default function SitupScreen() {
       }
       await initTodaySitUpPushUp();
     } catch (error) {
+      console.error('保存力量记录异常:', error);
       Alert.alert('失败', '保存记录失败');
     }
   };

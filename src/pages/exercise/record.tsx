@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { format, parse } from 'date-fns';
 import Calendar from './calendar';
-import { exerciseService } from '@/src/service/exercise';
-import { DailyExercise, Record as RecordModel, RecordType } from '@/src/db/model';
+import { exerciseService } from '@/src/service/exercise/exercise';
+import { DailyExercise, Record as RecordModel, RecordType } from '@/src/service/exercise/model';
 
 export default function RecordScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);

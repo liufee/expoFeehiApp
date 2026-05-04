@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Alert, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { format, parse, addMinutes } from 'date-fns';
-import { exerciseService } from '@/src/service/exercise';
-import { Record, RecordType, Status } from '@/src/db/model';
+import { exerciseService } from '@/src/service/exercise/exercise';
+import { Record, RecordType, Status } from '@/src/service/exercise/model';
 import * as FileSystem from 'expo-file-system/legacy';
 
 const { width } = Dimensions.get('window');
@@ -63,7 +63,6 @@ export default function AbdominalScreen() {
                 return;
             }
             const records = rows.map((row: any) => {
-                const ext = row.ext.split(',');
                 return {
                     id: row.id,
                     type: row.type,
@@ -79,6 +78,7 @@ export default function AbdominalScreen() {
             });
             setList(records);
         } catch (error) {
+            console.error('获取腹肌记录失败:', error);
             Alert.alert('失败', '获取记录失败');
         }
     };
@@ -329,13 +329,12 @@ export default function AbdominalScreen() {
             run: {} as any,
             status: status,
             sitUpPushUp: {} as any,
-            tsr: 1,
-            tsrVerified: 1,
         };
 
         try {
             const [success, error] = await exerciseService.saveRecord(record);
             if (!success) {
+                console.error('保存腹肌记录失败:', error);
                 Alert.alert('失败', error);
                 return false;
             }
@@ -354,6 +353,7 @@ export default function AbdominalScreen() {
             await refreshRecords();
             return true;
         } catch (error) {
+            console.error('保存腹肌记录异常:', error);
             Alert.alert('失败', '保存记录失败');
             return false;
         }
@@ -374,8 +374,6 @@ export default function AbdominalScreen() {
                 curlUp: 117,
                 legsUpTheWallPose: 3,
             },
-            tsr: 1,
-            tsrVerified: 1,
         };
 
         try {
