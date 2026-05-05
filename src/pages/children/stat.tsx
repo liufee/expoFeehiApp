@@ -37,7 +37,7 @@ const EventTypes = {
 };
 
 // ========== 自定义下拉选择器 ==========
-function CustomPicker({ options, selectedValue, onValueChange, placeholder = '请选择' }: 
+function CustomPicker({ options, selectedValue, onValueChange, placeholder = '请选择' }:
     {options: any, selectedValue: string, onValueChange: (value: string) => void, placeholder?: string}) {
     const [modalVisible, setModalVisible] = useState(false);
     const selectedLabel = options[selectedValue] || placeholder;
@@ -111,7 +111,7 @@ function DateInput({ label, value, onChange }: {label: string, value: Date, onCh
 }
 
 // ========== 主页面 ==========
-export default function BabyEventStatsScreen() {
+export default function Stat() {
     const [events, setEvents] = useState<any[]>([]);
     const [selectedChild, setSelectedChild] = useState('son');
     const [filterType, setFilterType] = useState('yesterday');
@@ -127,11 +127,11 @@ export default function BabyEventStatsScreen() {
 
         const [success, items, err] = await childrenService.getEvents(
             [selectedChild],
-            [EventType.Eat, EventType.Poop, EventType.Pee, EventType.Sleep, EventType.Cry], 
-            start.toISOString(), 
+            [EventType.Eat, EventType.Poop, EventType.Pee, EventType.Sleep, EventType.Cry],
+            start.toISOString(),
             end.toISOString(),
             'created_at',
-            'DESC',  
+            'DESC',
             -1
         );
         if(!success) {

@@ -78,7 +78,7 @@ function LabeledInput({ label, value, onChange, placeholder, keyboardType='defau
     );
 }
 
-export default function WriteBabyEventScreen(){
+export default function Write(){
     const [child,setChild] = useState('son');
     const [eventType,setEventType] = useState(EventType.Eat);
     const [events,setEvents] = useState<any[]>([]);
@@ -106,11 +106,11 @@ export default function WriteBabyEventScreen(){
         const end = new Date();
         const [success, items, err] = await childrenService.getEvents(
             Object.keys(childrenList),
-            [EventType.Eat, EventType.Poop, EventType.Pee, EventType.Sleep, EventType.Cry], 
-            start.toISOString(), 
-            end.toISOString(), 
+            [EventType.Eat, EventType.Poop, EventType.Pee, EventType.Sleep, EventType.Cry],
+            start.toISOString(),
+            end.toISOString(),
             'created_at',
-            'DESC',  
+            'DESC',
             5
         );
         if(!success) {
