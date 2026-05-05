@@ -21,6 +21,7 @@ const MAPPING = {
   'figure.core.training': 'fitness-center',
   'figure.strengthtraining.traditional': 'sports-gymnastics',
   'clock.fill': 'access-time',
+  'folder.fill': 'folder',
 } as IconMapping;
 
 /**

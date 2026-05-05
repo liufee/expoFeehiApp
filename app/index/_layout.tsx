@@ -17,6 +17,24 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarStyle: { display: 'none' },
       }}>
+        <Tabs.Screen
+            name="index"
+            options={{
+                title: '首页',
+                tabBarIcon: ({ color }) => (
+                    <IconSymbol size={28} name="figure.core.training" color={color} />
+                ),
+            }}
+        />
+        <Tabs.Screen
+            name="fileManagerScreen"
+            options={{
+                title: '文件管理',
+                tabBarIcon: ({ color }) => (
+                    <IconSymbol size={28} name="folder.fill" color={color} />
+                ),
+            }}
+        />
     </Tabs>
   );
 }

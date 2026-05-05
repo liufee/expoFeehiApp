@@ -4,8 +4,10 @@ import { router } from 'expo-router';
 
 export default function HomeScreen() {
     const menuItems = [
-        { title: '运动健身111', icon: '🏃', route: '/exercise', color: '#4CAF50', description: '腹肌、力量、跑步训练' },
+        { title: '运动健身', icon: '🏃', route: '/exercise', color: '#4CAF50', description: '腹肌、力量、跑步训练' },
+        { title: '孩子', icon: '', route: '/children', color: '#4CAF50', description: '腹肌、力量、跑步训练' },
         { title: '微博', icon: '📱', route: '/weibo', color: '#E6162D', description: '社交媒体浏览' },
+        { title: '文件管理', icon: '📱', route: '/fileManagerScreen', color: '#E6162D', description: '社交媒体浏览' },
     ];
 
     return (
@@ -16,7 +18,7 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.menuContainer}>
-                {menuItems.map((item, index) => (
+              {menuItems.map((item, index) => (
                     <TouchableOpacity
                         key={index}
                         style={[styles.menuItem, { backgroundColor: item.color }]}
