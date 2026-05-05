@@ -5,6 +5,7 @@ import { format, parse, addMinutes } from 'date-fns';
 import { exerciseService } from '@/src/service/exercise/exercise';
 import { Record, RecordType, Status } from '@/src/service/exercise/model';
 import * as FileSystem from 'expo-file-system/legacy';
+import {APPRuntimePath} from "@/constants";
 
 const { width } = Dimensions.get('window');
 
@@ -54,7 +55,6 @@ export default function AbdominalScreen() {
     const [duration, setDuration] = useState(0);
 
     const VIDEO_URL = 'https://img-1251086492.cos.ap-guangzhou.myqcloud.com/feehiapp/videos/keep_1_1.mp4';
-    const VIDEO_PATH = `${FileSystem.documentDirectory}videos/keep_1_1.mp4`;
 
     const refreshRecords = async () => {
         try {
@@ -86,7 +86,7 @@ export default function AbdominalScreen() {
 
     const initializeVideo = async () => {
         const remoteUrl = VIDEO_URL;
-        const dirPath = `${FileSystem.documentDirectory}videos`;
+        const dirPath = `${APPRuntimePath}`;
         const localPath = `${dirPath}/keep_1_1.mp4`;
         const tempPath = `${localPath}.tmp`;
 
@@ -277,7 +277,7 @@ export default function AbdominalScreen() {
         const playingSubscription = player.addListener('playingChange', ({ isPlaying: playing }) => {
             console.log('播放状态变化:', playing, 'currentAction:', currentAction, 'currentTime:', player?.currentTime, 'duration:', duration);
             setIsPlaying(playing);
-            
+
             // iOS 特别处理：如果从播放变为暂停，且接近视频末尾，说明播放结束
             if (!playing && isPlaying && duration > 0) {
                 const timeDiff = duration - player.currentTime;
@@ -392,7 +392,7 @@ export default function AbdominalScreen() {
 
     const autoSaveSitUpPushUpRecord = async () => {
         if (saving) return; // 如果正在保存，直接返回
-        
+
         const endAt = new Date();
         const record = {
             type: RecordType.RecordTypeSitUpPushUp,
