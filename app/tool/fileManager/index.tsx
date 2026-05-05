@@ -76,7 +76,7 @@ export default function FileManagerScreen() {
           size: isDirectory ? (item as Directory).size || undefined : (item as File).size || undefined,
           modificationTime: isDirectory ? undefined : (item as File).modificationTime || undefined,
         });
-        
+
         // 调试日志：打印文件的时间戳
         if (!isDirectory && (item as File).modificationTime) {
           console.log(`文件 ${name} 的时间戳:`, (item as File).modificationTime);
@@ -140,10 +140,7 @@ export default function FileManagerScreen() {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
     const result = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    
-    // 调试日志
-    console.log('格式化日期 - 输入:', timestamp, '输出:', result);
-    
+
     return result;
   };
 
