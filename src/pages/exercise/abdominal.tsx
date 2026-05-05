@@ -502,6 +502,7 @@ export default function AbdominalScreen() {
                         style={styles.video}
                         allowsFullscreen
                         allowsPictureInPicture
+                        nativeControls={false}
                     />
                 </View>
             )}
