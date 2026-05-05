@@ -507,6 +507,13 @@ export default function AbdominalScreen() {
             )}
 
             <View style={styles.content}>
+                {/* 保存时锁定整个页面的遮罩层 */}
+                {saving && (
+                    <View style={styles.savingOverlay}>
+                        <ActivityIndicator size="large" color="#007bff" />
+                    </View>
+                )}
+
                 <Text style={styles.title}>
                     {currentAction > -1 ? actions[currentAction].description + ' ' : ''}
                     {actions[currentAction]?.name || '开始锻炼'}
@@ -555,7 +562,7 @@ export default function AbdominalScreen() {
                             ...styles.button,
                             backgroundColor: (paused || hasEnded.current || currentAction === -1 || saving) ? '#9E9E9E' : '#16A34A',
                         }}>
-                        <Text style={styles.buttonText}>{saving ? '保存中...' : '完成'}</Text>
+                        <Text style={styles.buttonText}>完成</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -666,5 +673,16 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#333',
         marginBottom: 5,
+    },
+    savingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        zIndex: 999,
     },
 });
