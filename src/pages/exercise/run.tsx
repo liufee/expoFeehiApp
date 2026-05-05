@@ -9,8 +9,19 @@ import {
   Alert,
   ScrollView,
   PanResponder,
+  Platform,
 } from 'react-native';
-import MapView, { Polyline, Marker } from 'react-native-maps';
+// 条件导入 react-native-maps，仅在非 Web 平台
+let MapView: any;
+let Polyline: any;
+let Marker: any;
+
+if (Platform.OS !== 'web') {
+  const Maps = require('react-native-maps');
+  MapView = Maps.default;
+  Polyline = Maps.Polyline;
+  Marker = Maps.Marker;
+}
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { format, parse, isValid } from 'date-fns';
@@ -376,50 +387,61 @@ export default function RunScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 地图视图 */}
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={{
-          latitude: 22.600995460902272,
-          longitude: 113.8487422331694,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-        showsUserLocation={true}
-        followsUserLocation={running}
-      >
-        {path.length > 0 && (
-          <>
-            <Polyline
-              coordinates={path.map((p) => ({
-                latitude: p.latitude,
-                longitude: p.longitude,
-              }))}
-              strokeColor="#007AFF"
-              strokeWidth={4}
-            />
-            {path.length > 0 && (
-              <Marker
-                coordinate={{
-                  latitude: path[0].latitude,
-                  longitude: path[0].longitude,
-                }}
-                title="起点"
+      {/* 地图视图 - 仅在原生平台显示 */}
+      {Platform.OS !== 'web' ? (
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          initialRegion={{
+            latitude: 22.600995460902272,
+            longitude: 113.8487422331694,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          showsUserLocation={true}
+          followsUserLocation={running}
+        >
+          {path.length > 0 && (
+            <>
+              <Polyline
+                coordinates={path.map((p) => ({
+                  latitude: p.latitude,
+                  longitude: p.longitude,
+                }))}
+                strokeColor="#007AFF"
+                strokeWidth={4}
               />
-            )}
-            {!running && path.length > 0 && (
-              <Marker
-                coordinate={{
-                  latitude: path[path.length - 1].latitude,
-                  longitude: path[path.length - 1].longitude,
-                }}
-                title="终点"
-              />
-            )}
-          </>
-        )}
-      </MapView>
+              {path.length > 0 && (
+                <Marker
+                  coordinate={{
+                    latitude: path[0].latitude,
+                    longitude: path[0].longitude,
+                  }}
+                  title="起点"
+                />
+              )}
+              {!running && path.length > 0 && (
+                <Marker
+                  coordinate={{
+                    latitude: path[path.length - 1].latitude,
+                    longitude: path[path.length - 1].longitude,
+                  }}
+                  title="终点"
+                />
+              )}
+            </>
+          )}
+        </MapView>
+      ) : (
+        /* Web 平台的替代显示 */
+        <View style={styles.webMapPlaceholder}>
+          <Text style={styles.webMapText}>🗺️ 地图功能</Text>
+          <Text style={styles.webMapSubtext}>跑步路线追踪仅在移动设备上可用</Text>
+          {path.length > 0 && (
+            <Text style={styles.webMapInfo}>已记录 {path.length} 个位置点</Text>
+          )}
+        </View>
+      )}
 
       {/* 信息面板 - 支持滑动切换速度单位 */}
       <View style={styles.infoPanel} {...panResponder.panHandlers}>
@@ -568,6 +590,28 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  webMapPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    padding: 20,
+  },
+  webMapText: {
+    fontSize: 48,
+    marginBottom: 10,
+  },
+  webMapSubtext: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  webMapInfo: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 10,
   },
   infoPanel: {
     position: 'absolute',
