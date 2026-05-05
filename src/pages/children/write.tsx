@@ -24,16 +24,65 @@ const cryLevels = ['轻','中','重'];
 // 通用左label右输入框布局
 function LabeledDateTime({ label, value, onChange, mode = 'datetime' }:
     {label:string, value:Date, onChange:(value: Date) => void, mode:'date' | 'time' | 'datetime'}){
-    const [open,setOpen] = useState(false);
+    const [inputValue, setInputValue] = useState(format(value, 'yyyy-MM-dd HH:mm:ss'));
+    const [error, setError] = useState('');
+
+    // 验证时间格式并更新日期
+    const handleInputChange = (text: string) => {
+        setInputValue(text);
+        
+        // 尝试解析输入的时间字符串
+        const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+        if (!dateRegex.test(text)) {
+            setError('请输入正确的时间格式：YYYY-MM-DD HH:mm:ss');
+            return;
+        }
+        
+        const parsedDate = new Date(text);
+        if (isNaN(parsedDate.getTime())) {
+            setError('无效的时间格式');
+            return;
+        }
+        
+        // 验证日期各部分是否合理
+        const year = parsedDate.getFullYear();
+        const month = parsedDate.getMonth() + 1;
+        const day = parsedDate.getDate();
+        const hours = parsedDate.getHours();
+        const minutes = parsedDate.getMinutes();
+        const seconds = parsedDate.getSeconds();
+        
+        // 检查原始输入与解析后的日期是否一致（防止自动修正）
+        const inputParts = text.split(/[- :]/);
+        const inputYear = parseInt(inputParts[0]);
+        const inputMonth = parseInt(inputParts[1]);
+        const inputDay = parseInt(inputParts[2]);
+        const inputHours = parseInt(inputParts[3]);
+        const inputMinutes = parseInt(inputParts[4]);
+        const inputSeconds = parseInt(inputParts[5]);
+        
+        if (year !== inputYear || month !== inputMonth || day !== inputDay ||
+            hours !== inputHours || minutes !== inputMinutes || seconds !== inputSeconds) {
+            setError('日期或时间值超出有效范围');
+            return;
+        }
+        
+        setError('');
+        onChange(parsedDate);
+    };
 
     return (
         <>
             <View style={styles.row}>
                 <Text style={styles.label}>{label}</Text>
-                <TouchableOpacity style={styles.input} onPress={()=>setOpen(true)}>
-                    <TextInput style={styles.inputText}>{format(value, 'yyyy-MM-dd HH:mm:ss')}</TextInput>
-                </TouchableOpacity>
+                <TextInput 
+                    style={[styles.input, error ? styles.inputError : null]} 
+                    value={inputValue}
+                    onChangeText={handleInputChange}
+                    placeholder="YYYY-MM-DD HH:mm:ss"
+                />
             </View>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
         </>
     );
 }
@@ -242,6 +291,8 @@ const styles = StyleSheet.create({
     row: { flexDirection:'row', alignItems:'center', marginVertical:6 },
     label: { width:90, fontSize:14, color:'#555' },
     input: { flex:1, paddingVertical:12,paddingHorizontal:14,borderWidth:1,borderColor:'#007AFF',borderRadius:8, backgroundColor:'#f0f7ff' },
+    inputError: { borderColor:'#FF3B30', backgroundColor:'#FFF0F0' },
+    errorText: { color:'#FF3B30', fontSize:12, marginLeft:90, marginTop:-4, marginBottom:4 },
     inputText: { fontSize:14,color:'#007AFF',fontWeight:'500' },
     optionRow: { flexDirection:'row', flexWrap:'wrap' },
     optionBtn: { paddingVertical:6,paddingHorizontal:12,borderWidth:1,borderColor:'#ddd',borderRadius:20,marginRight:6,marginBottom:6, backgroundColor:'#fff', textAlign:'center' },
