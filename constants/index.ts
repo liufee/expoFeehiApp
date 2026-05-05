@@ -1,7 +1,7 @@
 import { File, Directory, Paths } from 'expo-file-system';
 
 export const AppStorageBasePath = `${Paths.document.uri}/feehi`;
-export const AppDBBasePath = `${AppStorageBasePath}/` + (__DEV__ ? 'db' : 'db_debug');;
+export const AppDBBasePath = `${AppStorageBasePath}/` + (__DEV__ ? 'db' : 'db_debug');
 export const AppConfigBasePath = `${AppStorageBasePath}/config`;
 export const APPRuntimePath = `${AppStorageBasePath}/` + (__DEV__ ? 'runtime_debug' : 'runtime');
 export const AppFilesBasePath = `${AppStorageBasePath}/files`;
