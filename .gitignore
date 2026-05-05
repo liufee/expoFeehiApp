@@ -42,3 +42,5 @@ app-example
 /ios
 /android
 .idea
+src/config/config.dev.ts
+src/config/config.release.ts

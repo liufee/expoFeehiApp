@@ -39,6 +39,7 @@ export default function AbdominalScreen() {
     const [loadingText, setLoadingText] = useState('视频下载中...');
     const [showRetry, setShowRetry] = useState(false);
     const [videoUri, setVideoUri] = useState<string | null>(null);
+    const [saving, setSaving] = useState(false); // 保存时的 loading 状态
     const hasEnded = useRef(false);
 
     // 使用 expo-video 的 player
@@ -322,6 +323,7 @@ export default function AbdominalScreen() {
 
     const saveAbdominalRecord = async (status: Status) => {
         if (hasEnded.current) return true;
+        if (saving) return false; // 如果正在保存，直接返回
 
         // 优先使用 ref 中的值，因为它能立即更新，如果 ref 中没有则使用 state
         const actualStartAt = startAtRef.current || startAt;
@@ -333,6 +335,7 @@ export default function AbdominalScreen() {
             return false;
         }
 
+        setSaving(true); // 开始保存，设置 loading 状态
         const endAt = new Date();
         console.log("start at", actualStartAt, "end_at", endAt)
         const record = {
@@ -370,10 +373,14 @@ export default function AbdominalScreen() {
             console.error('保存腹肌记录异常:', error);
             Alert.alert('失败', '保存记录失败');
             return false;
+        } finally {
+            setSaving(false); // 保存完成，取消 loading 状态
         }
     };
 
     const autoSaveSitUpPushUpRecord = async () => {
+        if (saving) return; // 如果正在保存，直接返回
+        
         const endAt = new Date();
         const record = {
             type: RecordType.RecordTypeSitUpPushUp,
@@ -390,6 +397,7 @@ export default function AbdominalScreen() {
             },
         };
 
+        setSaving(true); // 开始保存
         try {
             const [success, error] = await exerciseService.saveRecord(record);
             if (!success) {
@@ -400,11 +408,13 @@ export default function AbdominalScreen() {
             Alert.alert('成功', '保存成功');
         } catch (error) {
             Alert.alert('失败', '保存记录失败');
+        } finally {
+            setSaving(false); // 保存完成
         }
     };
 
     const handleEnd = async () => {
-        if (hasEnded.current) {
+        if (hasEnded.current || saving) {
             return;
         }
         await saveAbdominalRecord(Status.StatusFinished);
@@ -412,6 +422,7 @@ export default function AbdominalScreen() {
     };
 
     const handleManualEnd = async () => {
+        if (saving) return; // 如果正在保存，直接返回
         await saveAbdominalRecord(Status.StatusUndone);
     };
 
@@ -506,13 +517,13 @@ export default function AbdominalScreen() {
                         <Text style={styles.buttonText}>{muted ? '静音' : '声音'}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        disabled={paused || hasEnded.current || currentAction === -1}
+                        disabled={paused || hasEnded.current || currentAction === -1 || saving} // 保存时禁用按钮
                         onPress={handleManualEnd}
                         style={{
                             ...styles.button,
-                            backgroundColor: paused || hasEnded.current || currentAction === -1 ? '#9E9E9E' : '#16A34A',
+                            backgroundColor: (paused || hasEnded.current || currentAction === -1 || saving) ? '#9E9E9E' : '#16A34A',
                         }}>
-                        <Text style={styles.buttonText}>完成</Text>
+                        <Text style={styles.buttonText}>{saving ? '保存中...' : '完成'}</Text>
                     </TouchableOpacity>
                 </View>
 

@@ -20,6 +20,7 @@ export default function RunScreen() {
   const [showHandInput, setShowHandInput] = useState(false);
   const [handInputStartAt, setHandInputStartAt] = useState('');
   const [handInputEndAt, setHandInputEndAt] = useState('');
+  const [saving, setSaving] = useState(false); // 保存时的 loading 状态
   const handInputDistance = 8.15; // 默认距离
 
   // 显示手动输入对话框
@@ -67,6 +68,8 @@ export default function RunScreen() {
 
   // 保存手动输入的记录
   const saveHandInput = async () => {
+    if (saving) return; // 如果正在保存，直接返回
+    
     // 验证开始时间
     let parsedDate = parse(handInputStartAt, 'yyyy-MM-dd HH:mm:ss', new Date());
     if (!isValid(parsedDate)) {
@@ -104,6 +107,7 @@ export default function RunScreen() {
       sitUpPushUp: {} as any,
     };
 
+    setSaving(true); // 开始保存
     try {
       const [success, message] = await exerciseService.saveRecord(record);
 
@@ -117,6 +121,8 @@ export default function RunScreen() {
     } catch (error) {
       console.error('Failed to save record:', error);
       Alert.alert('失败', '保存记录失败');
+    } finally {
+      setSaving(false); // 保存完成
     }
   };
 
@@ -162,13 +168,18 @@ export default function RunScreen() {
 
             <View style={styles.buttonContainer}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                disabled={saving} // 保存时禁用按钮
+                style={[styles.modalButton, styles.cancelButton, saving && { opacity: 0.5 }]}
                 onPress={() => setShowHandInput(false)}
               >
                 <Text style={styles.buttonText}>取消</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={saveHandInput}>
-                <Text style={styles.buttonText}>保存</Text>
+              <TouchableOpacity 
+                disabled={saving} // 保存时禁用按钮
+                style={[styles.modalButton, saving && { opacity: 0.5 }]}
+                onPress={saveHandInput}
+              >
+                <Text style={styles.buttonText}>{saving ? '保存中...' : '保存'}</Text>
               </TouchableOpacity>
             </View>
           </View>

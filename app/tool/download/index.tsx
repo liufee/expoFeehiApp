@@ -5,6 +5,7 @@ import * as Sharing from 'expo-sharing';
 import {AppMoviesBasePath} from '../../../constants';
 import { useRoute } from '@react-navigation/native';
 import { showToast } from '../../_layout';
+import config from '@/src/config';
 
 const Download = () => {
   const [url, setUrl] = useState('');
@@ -32,15 +33,11 @@ const Download = () => {
       setDownloadedSize(0);
       setShowProgressBySize(false);
 
-      // 固定的 API 配置（Expo Go 不支持动态配置）
-      const API_BASE_URL = 'https://api.feehi.com';
-      const FEEHI_SEC_VERIFY = 'your-verify-key-here';
-
-      const response = await fetch(API_BASE_URL + '/tool/video-parse', {
+      const response = await fetch(config.apiBaseURL + '/tool/video-parse', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-feehi-sec-verify': FEEHI_SEC_VERIFY,
+          'x-feehi-sec-verify': config.feehiSecVerify,
         },
         body: JSON.stringify({
           url: url,
@@ -62,7 +59,7 @@ const Download = () => {
 
       const filePath = `${targetDir}/${fileName}`;
       setProgress(0);
-      
+
       // 使用 expo-file-system 下载文件（Expo Go 兼容）
       const downloadResumable = FileSystem.createDownloadResumable(
         downloadURL,

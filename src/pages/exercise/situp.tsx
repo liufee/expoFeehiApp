@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, Text, TextInput, View, StyleSheet } from 'react-native';
+import { Alert, Button, Text, TextInput, View, StyleSheet, ActivityIndicator } from 'react-native';
 import { addMinutes, format, isValid, parse } from 'date-fns';
 import { exerciseService } from '@/src/service/exercise/exercise';
 import { Record, RecordType, Status } from '@/src/service/exercise/model';
@@ -16,6 +16,7 @@ export default function SitupScreen() {
     legsUpTheWallPose: 3,
   });
   const [existingRecordId, setExistingRecordId] = useState<string>('');
+  const [saving, setSaving] = useState(false); // 保存时的 loading 状态
 
   const initTodaySitUpPushUp = async () => {
     const today = format(now, 'yyyy-MM-dd');
@@ -60,6 +61,8 @@ export default function SitupScreen() {
   }, []);
 
   const handleSave = async () => {
+    if (saving) return; // 如果正在保存，直接返回
+    
     let parsedDate = parse(startTime, 'yyyy-MM-dd HH:mm:ss', new Date());
     if (!isValid(parsedDate)) {
       Alert.alert('错误', '开始时间格式错误: ' + startTime);
@@ -82,6 +85,7 @@ export default function SitupScreen() {
       sitUpPushUp: situpPushUp,
     };
 
+    setSaving(true); // 开始保存
     try {
       if (existingRecordId) {
         const [success, error] = await exerciseService.updateRecord(existingRecordId, record);
@@ -104,6 +108,8 @@ export default function SitupScreen() {
     } catch (error) {
       console.error('保存力量记录异常:', error);
       Alert.alert('失败', '保存记录失败');
+    } finally {
+      setSaving(false); // 保存完成
     }
   };
 
@@ -152,11 +158,20 @@ export default function SitupScreen() {
         </View>
       ))}
 
-      <Button
-        title={existingRecordId ? '修改记录' : '保存记录'}
-        onPress={handleSave}
-        color="#007bff"
-      />
+      <View style={styles.buttonContainer}>
+        {saving ? (
+          <View style={styles.savingIndicator}>
+            <ActivityIndicator size="small" color="#007bff" />
+            <Text style={styles.savingText}>保存中...</Text>
+          </View>
+        ) : (
+          <Button
+            title={existingRecordId ? '修改记录' : '保存记录'}
+            onPress={handleSave}
+            color="#007bff"
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -191,5 +206,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     flex: 1,
     backgroundColor: '#fff',
+  },
+  buttonContainer: {
+    marginTop: 20,
+  },
+  savingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+  },
+  savingText: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: '#007bff',
   },
 });
