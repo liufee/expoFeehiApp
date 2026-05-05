@@ -76,6 +76,11 @@ export default function FileManagerScreen() {
           size: isDirectory ? (item as Directory).size || undefined : (item as File).size || undefined,
           modificationTime: isDirectory ? undefined : (item as File).modificationTime || undefined,
         });
+        
+        // 调试日志：打印文件的时间戳
+        if (!isDirectory && (item as File).modificationTime) {
+          console.log(`文件 ${name} 的时间戳:`, (item as File).modificationTime);
+        }
       }
 
       // 排序：文件夹在前，文件在后，按名称排序
@@ -134,7 +139,12 @@ export default function FileManagerScreen() {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    const result = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    
+    // 调试日志
+    console.log('格式化日期 - 输入:', timestamp, '输出:', result);
+    
+    return result;
   };
 
   const createFolder = async () => {
@@ -980,10 +990,12 @@ export default function FileManagerScreen() {
           {item.name}
         </Text>
         <View style={styles.fileMeta}>
-          <Text style={[styles.fileSize, { color: themeColors.placeholderText }]}>
+          <Text style={[styles.fileSize, { color: themeColors.placeholderText }]} numberOfLines={1}>
             {item.isDirectory ? '文件夹' : (formatFileSize(item.size) + ' ' ) }
           </Text>
-          <Text style={[styles.fileDate, { color: themeColors.placeholderText }]}>{formatDate(item.modificationTime)}</Text>
+          <Text style={[styles.fileDate, { color: themeColors.placeholderText }]} numberOfLines={1}>
+            {formatDate(item.modificationTime)}
+          </Text>
         </View>
       </View>
       <TouchableOpacity
@@ -1326,6 +1338,7 @@ const styles = StyleSheet.create({
   fileDate: {
     fontSize: 12,
     flexShrink: 0,
+    minWidth: 150, // 确保有足够空间显示完整日期时间
   },
   moreButton: {
     padding: 8,
