@@ -50,6 +50,24 @@ export default function AbdominalScreen() {
         player.timeUpdateEventInterval = 0.5; // 设置时间更新间隔为 0.5 秒
     });
 
+    // 当视频URI设置后，延迟设置初始位置到第3秒
+    useEffect(() => {
+        if (videoUri && player && !hasEnded.current) {
+            console.log('视频URI已设置，准备设置初始位置');
+            // 延迟设置 currentTime，确保视频元数据已加载
+            const timer = setTimeout(() => {
+                console.log('设置视频初始位置到第3秒');
+                try {
+                    player.currentTime = 3;
+                } catch (e) {
+                    console.error('设置初始位置失败:', e);
+                }
+            }, 300);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [videoUri, player]);
+
     // 监听视频是否播放结束
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
@@ -199,6 +217,8 @@ export default function AbdominalScreen() {
             /*if (player) {
                 player.pause();
             }*/
+            // 重置结束标志
+            hasEnded.current = false;
         };
     }, []);
 
