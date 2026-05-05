@@ -46,6 +46,12 @@ export default function TabLayout() {
                 ),
             }}
         />
+        <Tabs.Screen
+            name="pregnancy/calculate"
+            options={{
+                href: null,
+            }}
+        />
     </Tabs>
   );
 }
