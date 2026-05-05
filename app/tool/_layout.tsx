@@ -27,6 +27,16 @@ export default function TabLayout() {
             }}
         />
         <Tabs.Screen
+            name="pregnancy/index"
+            options={{
+                title: '孕周',
+                href: "/tool/pregnancy",
+                tabBarIcon: ({ color }) => (
+                    <IconSymbol size={28} name="arrow.down.circle" color={color} />
+                ),
+            }}
+        />
+        <Tabs.Screen
             name="download/index"
             options={{
                 title: '下载',
