@@ -10,8 +10,8 @@ export const DownloadPath = `${APPRuntimePath}/download`;
 
 export const AppWeiboBasePath = `${AppFilesBasePath}/` + (__DEV__ ? 'weibo_debug' : 'weibo');
 export const AppWeiboLargeBasePath = `${AppFilesBasePath}/` + (__DEV__ ? 'large_weibo_debug' : 'large_weibo');
-export const AppMoviesBasePath = `${FileSystem.documentDirectory}/Movies/feehi`;
-export const AppPicturesBasePath = `${FileSystem.documentDirectory}/Pictures/feehi`;
+export const AppMoviesBasePath = `${FileSystem.documentDirectory}Movies/feehi`;
+export const AppPicturesBasePath = `${FileSystem.documentDirectory}Pictures/feehi`;
 
 
 export const HTTPCDNBaseURL = 'https://img-1251086492.cos.ap-guangzhou.myqcloud.com/feehiapp';

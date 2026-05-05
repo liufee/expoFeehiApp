@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Alert, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { format, parse, addMinutes } from 'date-fns';
 import { exerciseService } from '@/src/service/exercise/exercise';
@@ -479,8 +479,7 @@ export default function AbdominalScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
             {/* 加载状态 */}
             {loading && (
                 <View style={styles.loadingOverlay}>
@@ -577,16 +576,10 @@ export default function AbdominalScreen() {
                 </View>
             </View>
             </ScrollView>
-        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#f9f9f9',
-        paddingTop: Platform.OS === 'ios' ? 0 : 35, // iOS 由 SafeAreaView 自动处理，Android 需要手动添加顶部边距
-    },
     container: {
         flex: 1,
         backgroundColor: '#f9f9f9',

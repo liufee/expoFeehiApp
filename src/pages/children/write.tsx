@@ -237,7 +237,7 @@ export default function Write(){
 }
 
 const styles = StyleSheet.create({
-    container: {  flex: 1, backgroundColor: '#F8F9FA' },
+    container: {  flex: 1, backgroundColor: '#F8F9FA', paddingTop: 20 }, // 为全局 SafeArea 添加额外的顶部间距
     formContainer: {padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#F0F0F0'},
     row: { flexDirection:'row', alignItems:'center', marginVertical:6 },
     label: { width:90, fontSize:14, color:'#555' },

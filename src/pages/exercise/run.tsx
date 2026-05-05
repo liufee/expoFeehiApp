@@ -195,6 +195,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
+    paddingTop: 20, // 为全局 SafeArea 添加额外的顶部间距
   },
   title: {
     fontSize: 28,

@@ -254,6 +254,7 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#F8F8F8',
     position: 'relative',
+    paddingTop: 25, // 为全局 SafeArea 添加额外的顶部间距
   },
   menuButton: {
     position: 'absolute',

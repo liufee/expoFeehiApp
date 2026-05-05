@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+        paddingTop: 20, // 为全局 SafeArea 添加额外的顶部间距
     },
     header: {
         padding: 30,

@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f8f9fa',
     flex: 1,
+    paddingTop: 30, // 为全局 SafeArea 添加额外的顶部间距
   },
   title: {
     fontSize: 20,

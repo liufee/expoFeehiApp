@@ -338,7 +338,7 @@ export default function Stat() {
 
 // ========== 样式（移除 LogItem 相关样式）==========
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F8F9FA' },
+    container: { flex: 1, backgroundColor: '#F8F9FA', paddingTop: 20 }, // 为全局 SafeArea 添加额外的顶部间距
 
     // 筛选区域
     filterSection: {
