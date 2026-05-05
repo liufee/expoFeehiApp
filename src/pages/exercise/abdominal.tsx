@@ -267,22 +267,33 @@ export default function AbdominalScreen() {
         console.log('注册播放器事件监听器');
         console.log('当前 duration:', duration);
 
+        // iOS 和 Android 通用：监听视频播放完成事件（最可靠的方式）
+        const playToEndSubscription = player.addListener('playToEnd', () => {
+            console.log('视频播放完成（playToEnd 事件），调用 handleEnd');
+            handleEnd();
+        });
+
         // 监听播放状态变化
         const playingSubscription = player.addListener('playingChange', ({ isPlaying: playing }) => {
-            console.log('播放状态变化:', playing, 'currentAction:', currentAction);
+            console.log('播放状态变化:', playing, 'currentAction:', currentAction, 'currentTime:', player?.currentTime, 'duration:', duration);
             setIsPlaying(playing);
             
-            // 如果从播放变为暂停，且接近视频末尾，可能是播放结束导致的自动暂停
-            if (!playing && isPlaying && duration > 0 && player.currentTime >= duration - 2) {
-                console.log('检测到播放结束（从播放变为暂停且接近末尾）');
-                handleEnd();
+            // iOS 特别处理：如果从播放变为暂停，且接近视频末尾，说明播放结束
+            if (!playing && isPlaying && duration > 0) {
+                const timeDiff = duration - player.currentTime;
+                console.log('视频结束时间差:', timeDiff);
+                // iOS 上视频结束时会自动暂停，且时间在末尾 2 秒内
+                if (timeDiff <= 2 && timeDiff >= 0) {
+                    console.log('检测到播放结束（iOS 播放状态变化），调用 handleEnd');
+                    handleEnd();
+                }
             }
         });
 
-        // 监听播放器状态变化（包括 ended）
+        // 监听播放器状态变化（包括 ended）- Android 主要依赖此事件
         const statusSubscription = player.addListener('statusChange', (status) => {
-            console.log('播放器状态变化:', status, 'currentAction:', currentAction);
-            // 检查是否是结束状态
+            console.log('播放器状态变化:', status, 'currentAction:', currentAction, 'currentTime:', player?.currentTime, 'duration:', duration);
+            // 检查是否是结束状态（Android 和 iOS 通用）
             if ((status.status === 'ended' || status.status === 'idle') && !hasEnded.current) {
                 console.log('视频播放结束（statusChange），调用 handleEnd');
                 handleEnd();
@@ -307,6 +318,7 @@ export default function AbdominalScreen() {
 
         return () => {
             console.log('移除播放器事件监听器');
+            playToEndSubscription.remove();
             playingSubscription.remove();
             statusSubscription.remove();
             durationSubscription.remove();
