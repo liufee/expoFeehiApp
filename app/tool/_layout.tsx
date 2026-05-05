@@ -5,7 +5,6 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import {Button} from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -16,17 +15,26 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarStyle: { display: 'none' },
       }}>
         <Tabs.Screen
-            name="tool"
+            name="fileManager/index"
             options={{
-                title: 'download',
+                title: '文件管理',
+                href: "/tool/fileManager",
                 tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="figure.core.training" color={color} />
+                    <IconSymbol size={28} name="folder" color={color} />
                 ),
             }}
-
+        />
+        <Tabs.Screen
+            name="download/index"
+            options={{
+                title: '下载',
+                href: "/tool/download",
+                tabBarIcon: ({ color }) => (
+                    <IconSymbol size={28} name="arrow.down.circle" color={color} />
+                ),
+            }}
         />
     </Tabs>
   );

@@ -27,7 +27,6 @@ export default function RootLayout() {
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           <Stack.Screen name="exercise" options={{ headerShown: false }} />
           <Stack.Screen name="children" options={{ headerShown: false }} />
-          <Stack.Screen name="test-safearea" options={{ headerShown: true, title: 'SafeArea 测试' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
