@@ -1,5 +1,27 @@
 import { Platform } from 'react-native';
-import { Paths } from 'expo-file-system';
+
+// 为 Web 平台提供替代方案，因为 expo-file-system 在 Web 上不支持
+let Paths: any;
+if (Platform.OS !== 'web') {
+    try {
+        const FileSystem = require('expo-file-system');
+        Paths = FileSystem.Paths;
+    } catch (error) {
+        console.warn('expo-file-system not available, using fallback paths for web');
+        Paths = {
+            document: {
+                uri: typeof window !== 'undefined' ? (window.localStorage.getItem('app_storage_path') || 'file:///storage/') : 'file:///storage/'
+            }
+        };
+    }
+} else {
+    // Web 平台的默认路径
+    Paths = {
+        document: {
+            uri: typeof window !== 'undefined' ? (window.localStorage.getItem('app_storage_path') || 'file:///storage/') : 'file:///storage/'
+        }
+    };
+}
 
 export const AppStorageBasePath = `${Paths.document.uri}feehi`;
 export const AppDBBasePath = `${AppStorageBasePath}/db`;
