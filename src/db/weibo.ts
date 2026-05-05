@@ -15,7 +15,7 @@ class Weibo{
 
     public async init() {
         try {
-            this.db = await SQLite.openDatabaseAsync(AppDBBasePath + '/weibo' + (__DEV__ ? '_debug' : ''));
+            this.db = await SQLite.openDatabaseAsync( 'weibo' + (__DEV__ ? '_debug' : ''),undefined, AppDBBasePath);
             //await this.enableWal();
             await this.createTable();
         }catch (e) {
