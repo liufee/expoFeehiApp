@@ -1,7 +1,7 @@
 import Calculate from './calculate';
 import {PanResponder, View, TextInput} from 'react-native';
 import {useEffect, useRef, useState} from 'react';
-import { File, Paths } from 'expo-file-system';
+import { File } from 'expo-file-system';
 import {APPRuntimePath} from '../../../constants';
 
 const ivfBefore = [
@@ -52,12 +52,13 @@ const Pregnancy = ({ route }) =>{
         try {
             // 构建文件路径
             const filePath = dir + 'surrogacy.json';
-            
-            // 使用 expo-file-system 的 File 类读取文件
+
+            // 使用新的 File API
             const file = new File(filePath);
-            
+
             if (file.exists) {
-                const eventsString = await file.readAsync({ encoding: 'utf8' });
+                // 使用 readText 方法读取文件
+                const eventsString = await file.text();
                 const events = JSON.parse(eventsString);
                 setSonEvents(events['儿子']);
                 setDaughterEvents(events['女儿']);

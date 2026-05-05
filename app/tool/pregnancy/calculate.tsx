@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import {File} from "expo-file-system/src";
+import {APPRuntimePath} from "@/constants";
 
 type EventLink = { text: string; url: string };
 type EventItem = { date: string | Date; text: string; links: EventLink[], tag?: string; color?: string;};
@@ -301,7 +303,8 @@ export default function PregnancyCalendarAutoScroll({
                                             await Linking.openURL(l.url);
                                         } else {
                                             // 本地文件链接，先检查文件是否存在
-                                            const fileInfo = await FileSystem.getInfoAsync(l.url);
+                                            l.url = l.url.replace('/storage/emulated/0/feehi/runtime', APPRuntimePath);
+                                            const fileInfo = new File(l.url);
                                             if (fileInfo.exists) {
                                                 // 尝试使用 expo-sharing 打开文件
                                                 const canShare = await Sharing.isAvailableAsync();

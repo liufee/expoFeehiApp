@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { Paths } from 'expo-file-system';
 
-export const AppStorageBasePath = `${Paths.document}feehi`;
+export const AppStorageBasePath = `${Paths.document.uri}feehi`;
 export const AppDBBasePath = `${AppStorageBasePath}/db`;
 export const AppConfigBasePath = `${AppStorageBasePath}/config`;
 export const APPRuntimePath = `${AppStorageBasePath}/` + (__DEV__ ? 'runtime_debug' : 'runtime');
@@ -10,8 +10,8 @@ export const DownloadPath = `${APPRuntimePath}/download`;
 
 export const AppWeiboBasePath = `${AppFilesBasePath}/` + (__DEV__ ? 'weibo_debug' : 'weibo');
 export const AppWeiboLargeBasePath = `${AppFilesBasePath}/` + (__DEV__ ? 'large_weibo_debug' : 'large_weibo');
-export const AppMoviesBasePath = `${Paths.document}Movies/feehi`;
-export const AppPicturesBasePath = `${Paths.document}Pictures/feehi`;
+export const AppMoviesBasePath = `${Paths.document.uri}Movies/feehi`;
+export const AppPicturesBasePath = `${Paths.document.uri}Pictures/feehi`;
 
 
 export const HTTPCDNBaseURL = 'https://img-1251086492.cos.ap-guangzhou.myqcloud.com/feehiapp';
