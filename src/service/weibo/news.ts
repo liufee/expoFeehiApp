@@ -82,7 +82,7 @@ class NewsService{
     }
 
     private async _getNews():Promise<[boolean, Weibo[], string]>{
-        const newsMedia = ['zaobao'];
+        const newsMedia = [''];
         const tasks = [];
         if (newsMedia.indexOf('zaobao') !== -1) {
             tasks.push(this.crawZaobao());
