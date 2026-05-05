@@ -22,7 +22,7 @@ export default function TabLayout() {
                 title: '文件管理',
                 href: "/tool/fileManager",
                 tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="folder" color={color} />
+                    <IconSymbol size={28} name="folder.fill" color={color} />
                 ),
             }}
         />

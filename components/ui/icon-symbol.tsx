@@ -23,6 +23,8 @@ const MAPPING = {
   'figure.run': 'directions-run',
   'clock.fill': 'access-time',
   'folder.fill': 'folder',
+  'folder': 'folder',
+  'arrow.down.circle': 'file-download',
 } as IconMapping;
 
 /**

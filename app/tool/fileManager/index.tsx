@@ -118,8 +118,23 @@ export default function FileManagerScreen() {
 
   const formatDate = (timestamp?: number): string => {
     if (!timestamp) return '-';
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    // 判断时间戳是秒还是毫秒：如果小于 10000000000 则是秒，否则是毫秒
+    const timestampMs = timestamp < 10000000000 ? timestamp * 1000 : timestamp;
+    const date = new Date(timestampMs);
+
+    // 验证日期是否合理（在 1970-2100 之间）
+    if (date.getFullYear() < 1970 || date.getFullYear() > 2100) {
+      console.warn('无效的时间戳:', timestamp, '转换后:', timestampMs, '日期:', date);
+      return '-';
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
   const createFolder = async () => {
@@ -966,11 +981,9 @@ export default function FileManagerScreen() {
         </Text>
         <View style={styles.fileMeta}>
           <Text style={[styles.fileSize, { color: themeColors.placeholderText }]}>
-            {item.isDirectory ? '文件夹' : formatFileSize(item.size)}
+            {item.isDirectory ? '文件夹' : (formatFileSize(item.size) + ' ' ) }
           </Text>
-          <Text style={[styles.fileDate, { color: themeColors.placeholderText }]}>
-            {formatDate(item.modificationTime)}
-          </Text>
+          <Text style={[styles.fileDate, { color: themeColors.placeholderText }]}>{formatDate(item.modificationTime)}</Text>
         </View>
       </View>
       <TouchableOpacity
@@ -1293,6 +1306,7 @@ const styles = StyleSheet.create({
   },
   fileInfo: {
     flex: 1,
+    minWidth: 0, // 允许 flex 子元素缩小
   },
   fileName: {
     fontSize: 16,
@@ -1302,12 +1316,16 @@ const styles = StyleSheet.create({
   fileMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
   },
   fileSize: {
     fontSize: 12,
+    flexShrink: 0,
   },
   fileDate: {
     fontSize: 12,
+    flexShrink: 0,
   },
   moreButton: {
     padding: 8,
