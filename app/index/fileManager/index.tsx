@@ -30,7 +30,7 @@ interface FileItem {
   size?: number;
   modificationTime?: number;
 }
-
+const syncURL = "http://192.168.1.2:8088"
 export default function FileManagerScreen() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? 'light'];
@@ -45,6 +45,7 @@ export default function FileManagerScreen() {
   const [newName, setNewName] = useState('');
   const [pathHistory, setPathHistory] = useState<string[]>([]);
   const [extractProgress, setExtractProgress] = useState<{visible: boolean; current: number; total: number; currentFile: string}>({visible: false, current: 0, total: 0, currentFile: ''});
+  const [syncProgress, setSyncProgress] = useState<{visible: boolean; current: number; total: number; currentFile: string; status: string}>({visible: false, current: 0, total: 0, currentFile: '', status: ''});
 
   useEffect(() => {
     loadFiles();
@@ -786,6 +787,159 @@ export default function FileManagerScreen() {
     }
   };
 
+  // 从服务器同步文件
+  const syncFromServer = async () => {
+    try {
+      // 调用扫描接口
+      const scanUrl = syncURL + '/scan';
+      console.log('开始扫描服务器文件...');
+
+      const scanResponse = await fetch(scanUrl);
+      if (!scanResponse.ok) {
+        throw new Error(`扫描失败: ${scanResponse.status}`);
+      }
+
+      const scanData = await scanResponse.json();
+      const files = scanData.files.filter((f: any) => f.type === 'file');
+      const totalFiles = files.length;
+
+      console.log(`发现 ${totalFiles} 个文件需要同步`);
+
+      // 显示确认对话框
+      Alert.alert(
+        '同步文件',
+        `发现 ${totalFiles} 个文件需要同步到当前目录。是否继续？`,
+        [
+          { text: '取消', style: 'cancel' },
+          {
+            text: '开始同步',
+            onPress: async () => {
+              await startSync(files);
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('扫描服务器失败:', error);
+      Alert.alert('错误', `扫描服务器失败: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
+  // 开始同步文件
+  const startSync = async (files: any[]) => {
+    const totalFiles = files.length;
+    let syncedCount = 0;
+    let failedCount = 0;
+
+    setSyncProgress({
+      visible: true,
+      current: 0,
+      total: totalFiles,
+      currentFile: '准备同步...',
+      status: ''
+    });
+
+    try {
+      for (const file of files) {
+        const fileName = file.name;
+        const relativePath = file.path; // 相对路径，如 "folder/subfolder/file.txt"
+        const fullPath = file.fullPath; // 完整路径，用于下载
+
+        setSyncProgress({
+          visible: true,
+          current: syncedCount + failedCount,
+          total: totalFiles,
+          currentFile: relativePath,
+          status: `正在下载 ${syncedCount + failedCount + 1}/${totalFiles}`
+        });
+
+        try {
+          // 构建目标路径（保持目录结构）
+          const destPath = `${currentPath}${relativePath}`;
+
+          // 确保父目录存在
+          const lastSlashIndex = destPath.lastIndexOf('/');
+          if (lastSlashIndex > 0) {
+            const parentDir = destPath.substring(0, lastSlashIndex + 1);
+            const parentDirectory = new Directory(parentDir);
+            if (!parentDirectory.exists) {
+              console.log(`创建目录: ${parentDir}`);
+              parentDirectory.create({ intermediates: true });
+            }
+          }
+
+          const destFile = new File(destPath);
+
+          // 如果文件已存在，跳过
+          if (destFile.exists) {
+            console.log(`文件已存在，跳过: ${relativePath}`);
+            syncedCount++;
+            continue;
+          }
+
+          // 下载文件（使用完整路径）
+          const downloadUrl = `${syncURL}/download?path=${encodeURIComponent(fullPath)}`;
+          const downloadResponse = await fetch(downloadUrl);
+
+          if (!downloadResponse.ok) {
+            throw new Error(`下载失败: ${downloadResponse.status}`);
+          }
+
+          // 获取文件数据并保存
+          const blob = await downloadResponse.blob();
+          const reader = new FileReader();
+
+          await new Promise<void>((resolve, reject) => {
+            reader.onloadend = async () => {
+              try {
+                const base64 = (reader.result as string).split(',')[1];
+                await FileSystemLegacy.writeAsStringAsync(destPath, base64, {
+                  encoding: FileSystemLegacy.EncodingType.Base64,
+                });
+                syncedCount++;
+                console.log(`成功同步: ${relativePath}`);
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        } catch (error) {
+          console.error(`同步文件失败 ${relativePath}:`, error);
+          failedCount++;
+        }
+
+        // 每5个文件暂停一下，让UI更新
+        if ((syncedCount + failedCount) % 5 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+      }
+
+      setSyncProgress({
+        visible: true,
+        current: totalFiles,
+        total: totalFiles,
+        currentFile: '完成',
+        status: `成功: ${syncedCount}, 失败: ${failedCount}`
+      });
+
+      // 延迟关闭进度条
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setSyncProgress({visible: false, current: 0, total: 0, currentFile: '', status: ''});
+
+      // 刷新文件列表
+      await loadFiles();
+
+      Alert.alert('同步完成', `成功: ${syncedCount} 个文件\n失败: ${failedCount} 个文件`);
+    } catch (error) {
+      console.error('同步失败:', error);
+      setSyncProgress({visible: false, current: 0, total: 0, currentFile: '', status: ''});
+      Alert.alert('错误', `同步失败: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
   const renderFileItem = ({ item }: { item: FileItem }) => (
     <TouchableOpacity
       style={[
@@ -884,6 +1038,9 @@ export default function FileManagerScreen() {
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton} onPress={importFile}>
             <Ionicons name="cloud-upload-outline" size={24} color={themeColors.tint} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.headerButton} onPress={syncFromServer}>
+            <Ionicons name="cloud-download-outline" size={24} color={themeColors.tint} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton} onPress={() => router.push('/')}>
             <Ionicons name="arrow-back" size={24} color={themeColors.text} />
@@ -1025,6 +1182,42 @@ export default function FileManagerScreen() {
               >
                 <Text style={styles.confirmButtonText}>确定</Text>
               </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 同步进度模态框 */}
+      <Modal
+        visible={syncProgress.visible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => {}}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
+            <Text style={[styles.modalTitle, { color: themeColors.text }]}>同步文件中...</Text>
+
+            <View style={styles.progressContainer}>
+              <Text style={[styles.progressText, { color: themeColors.text }]} numberOfLines={2}>
+                {syncProgress.currentFile}
+              </Text>
+
+              <View style={styles.progressBarBg}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${syncProgress.total > 0 ? (syncProgress.current / syncProgress.total) * 100 : 0}%`,
+                      backgroundColor: themeColors.tint
+                    }
+                  ]}
+                />
+              </View>
+
+              <Text style={[styles.progressDetail, { color: themeColors.placeholderText }]}>
+                {syncProgress.status || `${syncProgress.current} / ${syncProgress.total} 文件`}
+              </Text>
             </View>
           </View>
         </View>
