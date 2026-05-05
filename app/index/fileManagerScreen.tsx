@@ -20,6 +20,7 @@ import * as FileSystemLegacy from 'expo-file-system/legacy';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import JSZip from 'jszip';
 
 interface FileItem {
   name: string;
@@ -263,25 +264,33 @@ export default function FileManagerScreen() {
       }
 
       const selectedFile = result.assets[0];
-      const destPath = `${currentPath}${selectedFile.name}`;
+      const isZipFile = selectedFile.name.toLowerCase().endsWith('.zip');
       
-      const destFile = new File(destPath);
-      if (destFile.exists) {
-        Alert.alert(
-          '文件已存在',
-          `文件 "${selectedFile.name}" 已存在，是否覆盖？`,
-          [
-            { text: '取消', style: 'cancel' },
-            {
-              text: '覆盖',
-              onPress: async () => {
-                await performImport(selectedFile.uri, destPath);
-              },
-            },
-          ]
-        );
+      if (isZipFile) {
+        // 处理 ZIP 文件
+        await importAndExtractZip(selectedFile.uri, selectedFile.name);
       } else {
-        await performImport(selectedFile.uri, destPath);
+        // 处理普通文件
+        const destPath = `${currentPath}${selectedFile.name}`;
+        
+        const destFile = new File(destPath);
+        if (destFile.exists) {
+          Alert.alert(
+            '文件已存在',
+            `文件 "${selectedFile.name}" 已存在，是否覆盖？`,
+            [
+              { text: '取消', style: 'cancel' },
+              {
+                text: '覆盖',
+                onPress: async () => {
+                  await performImport(selectedFile.uri, destPath);
+                },
+              },
+            ]
+          );
+        } else {
+          await performImport(selectedFile.uri, destPath);
+        }
       }
     } catch (error) {
       console.error('导入失败:', error);
@@ -299,6 +308,134 @@ export default function FileManagerScreen() {
     } catch (error) {
       console.error('复制文件失败:', error);
       Alert.alert('错误', '导入失败');
+    }
+  };
+
+  // 解压并导入 ZIP 文件
+  const importAndExtractZip = async (zipUri: string, zipName: string) => {
+    try {
+      setLoading(true);
+      
+      // 读取 ZIP 文件内容
+      const zipData = await FileSystemLegacy.readAsStringAsync(zipUri, {
+        encoding: FileSystemLegacy.EncodingType.Base64,
+      });
+      
+      // 加载 ZIP 文件
+      const zip = await JSZip.loadAsync(zipData, { base64: true });
+      
+      // 创建临时文件夹来解压内容
+      const tempFolderName = `temp_extract_${Date.now()}`;
+      const tempFolderPath = `${currentPath}${tempFolderName}/`;
+      const tempFolder = new Directory(tempFolderPath);
+      tempFolder.create({ intermediates: true });
+      
+      // 解压所有文件
+      await extractZipContents(zip, tempFolderPath);
+      
+      // 将解压的内容移动到当前目录
+      await moveExtractedContents(tempFolderPath, currentPath);
+      
+      // 删除临时文件夹
+      if (tempFolder.exists) {
+        tempFolder.delete();
+      }
+      
+      await loadFiles();
+      Alert.alert('成功', 'ZIP 文件解压并导入成功');
+    } catch (error) {
+      console.error('解压 ZIP 文件失败:', error);
+      Alert.alert('错误', `解压失败: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 递归解压 ZIP 内容
+  const extractZipContents = async (zip: any, targetPath: string) => {
+    try {
+      // 遍历 ZIP 中的所有文件
+      const promises = Object.keys(zip.files).map(async (relativePath) => {
+        const zipEntry = zip.files[relativePath];
+        
+        // 跳过目录条目
+        if (zipEntry.dir) {
+          return;
+        }
+        
+        // 构建完整的目标路径
+        const fullPath = `${targetPath}${relativePath}`;
+        
+        // 确保父目录存在
+        const lastSlashIndex = fullPath.lastIndexOf('/');
+        if (lastSlashIndex > 0) {
+          const parentDir = fullPath.substring(0, lastSlashIndex + 1);
+          const parentDirectory = new Directory(parentDir);
+          if (!parentDirectory.exists) {
+            parentDirectory.create({ intermediates: true });
+          }
+        }
+        
+        // 获取文件数据
+        const fileData = await zipEntry.async('base64');
+        
+        // 写入文件
+        await FileSystemLegacy.writeAsStringAsync(fullPath, fileData, {
+          encoding: FileSystemLegacy.EncodingType.Base64,
+        });
+      });
+      
+      await Promise.all(promises);
+    } catch (error) {
+      console.error('解压内容失败:', error);
+      throw error;
+    }
+  };
+
+  // 移动解压的内容到目标位置
+  const moveExtractedContents = async (sourcePath: string, destPath: string) => {
+    try {
+      const sourceDir = new Directory(sourcePath);
+      if (!sourceDir.exists) {
+        return;
+      }
+      
+      const contents = sourceDir.list();
+      
+      for (const item of contents) {
+        const itemName = item.name;
+        const sourceItemPath = item.uri;
+        const destItemPath = `${destPath}${itemName}`;
+        
+        if (item instanceof Directory) {
+          // 如果是目录，递归移动
+          const destDir = new Directory(destItemPath + '/');
+          if (!destDir.exists) {
+            destDir.create({ intermediates: true });
+          }
+          await moveExtractedContents(sourceItemPath + '/', destItemPath + '/');
+          
+          // 删除源目录
+          const srcDir = new Directory(sourceItemPath + '/');
+          if (srcDir.exists) {
+            srcDir.delete();
+          }
+        } else {
+          // 如果是文件，移动文件
+          const sourceFile = new File(sourceItemPath);
+          const destFile = new File(destItemPath);
+          
+          // 如果目标文件已存在，先删除
+          if (destFile.exists) {
+            destFile.delete();
+          }
+          
+          sourceFile.move(destFile);
+        }
+      }
+    } catch (error) {
+      console.error('移动解压内容失败:', error);
+      throw error;
     }
   };
 
