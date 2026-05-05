@@ -63,14 +63,10 @@ export default function AbdominalScreen() {
                     console.error('设置初始位置失败:', e);
                 }
             }, 300);
-            
+
             return () => clearTimeout(timer);
         }
     }, [videoUri, player]);
-
-    // 监听视频是否播放结束
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [duration, setDuration] = useState(0);
 
     const VIDEO_URL = 'https://img-1251086492.cos.ap-guangzhou.myqcloud.com/feehiapp/videos/keep_1_1.mp4';
 
@@ -285,7 +281,6 @@ export default function AbdominalScreen() {
         if (!player) return;
 
         console.log('注册播放器事件监听器');
-        console.log('当前 duration:', duration);
 
         // iOS 和 Android 通用：监听视频播放完成事件（最可靠的方式）
         const playToEndSubscription = player.addListener('playToEnd', () => {
@@ -293,58 +288,15 @@ export default function AbdominalScreen() {
             handleEnd();
         });
 
-        // 监听播放状态变化
-        const playingSubscription = player.addListener('playingChange', ({ isPlaying: playing }) => {
-            console.log('播放状态变化:', playing, 'currentAction:', currentAction, 'currentTime:', player?.currentTime, 'duration:', duration);
-            setIsPlaying(playing);
-
-            // iOS 特别处理：如果从播放变为暂停，且接近视频末尾，说明播放结束
-            if (!playing && isPlaying && duration > 0) {
-                const timeDiff = duration - player.currentTime;
-                console.log('视频结束时间差:', timeDiff);
-                // iOS 上视频结束时会自动暂停，且时间在末尾 2 秒内
-                if (timeDiff <= 2 && timeDiff >= 0) {
-                    console.log('检测到播放结束（iOS 播放状态变化），调用 handleEnd');
-                    handleEnd();
-                }
-            }
-        });
-
-        // 监听播放器状态变化（包括 ended）- Android 主要依赖此事件
-        const statusSubscription = player.addListener('statusChange', (status) => {
-            console.log('播放器状态变化:', status, 'currentAction:', currentAction, 'currentTime:', player?.currentTime, 'duration:', duration);
-            // 检查是否是结束状态（Android 和 iOS 通用）
-            if ((status.status === 'ended' || status.status === 'idle') && !hasEnded.current) {
-                console.log('视频播放结束（statusChange），调用 handleEnd');
-                handleEnd();
-            }
-        });
-
-        // 监听时长变化，用于更新 duration 状态
-        const durationSubscription = player.addListener('durationChange', ({ duration: newDuration }) => {
-            console.log('视频时长变化:', newDuration);
-            setDuration(newDuration);
-        });
-
         const timeUpdateSubscription = player.addListener('timeUpdate', ({ currentTime }) => {
             handleProgress({ positionMillis: currentTime * 1000 });
-
-            // 通过检查当前时间和时长来判断是否播放结束（留 1 秒余量）
-            if (duration > 0 && currentTime >= duration - 1 && !hasEnded.current) {
-                console.log('检测到视频播放结束（时间判断）', currentTime, duration, 'isPlaying:', isPlaying);
-                handleEnd();
-            }
         });
 
         return () => {
             console.log('移除播放器事件监听器');
             playToEndSubscription.remove();
-            playingSubscription.remove();
-            statusSubscription.remove();
-            durationSubscription.remove();
-            timeUpdateSubscription.remove();
         };
-    }, [player, duration, currentAction, isPlaying]);
+    }, [player, currentAction]);
 
     // 监听静音状态变化
     useEffect(() => {
