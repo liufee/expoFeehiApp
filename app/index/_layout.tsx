@@ -5,36 +5,29 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import {Button} from "react-native";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+    const colorScheme = useColorScheme();
 
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarStyle: { display: 'none' },
-      }}>
-        <Tabs.Screen
-            name="index"
-            options={{
-                title: '首页',
-                tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="figure.core.training" color={color} />
-                ),
-            }}
-        />
-        <Tabs.Screen
-            name="fileManagerScreen"
-            options={{
-                title: '文件管理',
-                tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="folder.fill" color={color} />
-                ),
-            }}
-        />
-    </Tabs>
-  );
+    return (
+        <Tabs
+            screenOptions={{
+                tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+                headerShown: false,
+                tabBarButton: HapticTab,
+                tabBarStyle: { display: 'none' },
+            }}>
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: '文件管理',
+                    tabBarIcon: ({ color }) => (
+                        <IconSymbol size={28} name="figure.core.training" color={color} />
+                    ),
+                }}
+
+            />
+        </Tabs>
+    );
 }

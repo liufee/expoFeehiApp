@@ -7,7 +7,8 @@ export default function HomeScreen() {
         { title: '运动健身', icon: '🏃', route: '/exercise', color: '#4CAF50', description: '腹肌、力量、跑步训练' },
         { title: '孩子', icon: '', route: '/children', color: '#4CAF50', description: '腹肌、力量、跑步训练' },
         { title: '微博', icon: '📱', route: '/weibo', color: '#E6162D', description: '社交媒体浏览' },
-        { title: '文件管理', icon: '📱', route: '/fileManagerScreen', color: '#E6162D', description: '社交媒体浏览' },
+        { title: '工具', icon: '📱', route: '/tool', color: '#E6162D', description: '社交媒体浏览' },
+        { title: '文件管理', icon: '📱', route: '/fileManager', color: '#E6162D', description: '社交媒体浏览' },
     ];
 
     return (
