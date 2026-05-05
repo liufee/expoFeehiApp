@@ -18,8 +18,9 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-  'figure.core.training': 'fitness-center',
+  'figure.core.training': 'sledding',
   'figure.strengthtraining.traditional': 'sports-gymnastics',
+  'figure.run': 'directions-run',
   'clock.fill': 'access-time',
   'folder.fill': 'folder',
 } as IconMapping;

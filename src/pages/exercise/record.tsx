@@ -13,6 +13,7 @@ import { format, parse } from 'date-fns';
 import Calendar from './calendar';
 import { exerciseService } from '@/src/service/exercise/exercise';
 import { DailyExercise, Record as RecordModel, RecordType } from '@/src/service/exercise/model';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function RecordScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
@@ -185,13 +186,13 @@ export default function RecordScreen() {
                       onLongPress={() => handleDelete(exercise)}>
                       <View style={styles.iconContainer}>
                         {exercise.type === RecordType.RecordTypeAbdominal && (
-                          <Text style={styles.iconText}>🏋️</Text>
+                          <IconSymbol name="figure.core.training" size={28} color="#4CAF50" />
                         )}
                         {exercise.type === RecordType.RecordTypeRun && (
-                          <Text style={styles.iconText}>🏃</Text>
+                          <IconSymbol name="figure.run" size={28} color="#2196F3" />
                         )}
                         {exercise.type === RecordType.RecordTypeSitUpPushUp && (
-                          <Text style={styles.iconText}>💪</Text>
+                          <IconSymbol name="figure.strengthtraining.traditional" size={28} color="#FF9800" />
                         )}
                       </View>
                       <View style={styles.detailsContainer}>
@@ -374,9 +375,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
-  },
-  iconText: {
-    fontSize: 24,
   },
   detailsContainer: {
     flex: 1,
