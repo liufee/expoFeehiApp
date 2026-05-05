@@ -3,12 +3,14 @@ import {PanResponder, View, TextInput} from 'react-native';
 import {useEffect, useRef, useState} from 'react';
 import { File } from 'expo-file-system';
 import {APPRuntimePath} from '../../../constants';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ivfBefore = [
     {'date':'2025-07-08', 'label':'例'}, {'date':'2025-07-09', 'label':'促'}, {'date':'2025-07-13', 'label':'促'}, {'date':'2025-07-16', 'label':'促'}, {'date':'2025-07-18', 'label':'促'}, {'date':'2025-07-19', 'label':'促'}, {'date':'2025-07-21', 'label':'授'}, {'date':'2025-07-27', 'label':'性'}, {'date':'2025-08-01', 'label':'果'},
 ];
 
 const Pregnancy = ({ route }) =>{
+    const insets = useSafeAreaInsets();
     const [sonEvents, setSonEvents] = useState([]);
     const [daughterEvents, setDaughterEvents] = useState([]);
     const [showType, setShowType] = useState(0);
@@ -86,7 +88,7 @@ const Pregnancy = ({ route }) =>{
     };
 
     return (
-            <View {...panResponder.panHandlers} style={{ flex: 1, backgroundColor: '#eee' }}>
+            <View {...panResponder.panHandlers} style={{ flex: 1, backgroundColor: '#eee', paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }}>
                 {(showType === 0 || showType === 1 ) && <Calculate lastPeriod="2025-08-24" events={sonEvents} additionalDates={ivfBefore.concat([])} /> }
                 {showType === 0 &&  <View
                     style={{

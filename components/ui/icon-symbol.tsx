@@ -25,6 +25,7 @@ const MAPPING = {
   'folder.fill': 'folder',
   'folder': 'folder',
   'arrow.down.circle': 'file-download',
+  'pregnant-woman': 'pregnant-woman',
 } as IconMapping;
 
 /**

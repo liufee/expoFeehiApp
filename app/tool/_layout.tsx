@@ -32,7 +32,7 @@ export default function TabLayout() {
                 title: '孕周',
                 href: "/tool/pregnancy",
                 tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="arrow.down.circle" color={color} />
+                    <IconSymbol size={28} name="pregnant-woman" color={color} />
                 ),
             }}
         />
