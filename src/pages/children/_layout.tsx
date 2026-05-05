@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { childrenService } from '@/src/service/children/children';
 
 export default function ChildrenLayout() {
@@ -39,6 +40,9 @@ export default function ChildrenLayout() {
                 options={{
                     title: '记录',
                     tabBarLabel: '记录',
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="create-outline" size={size} color={color} />
+                    ),
                 }}
             />
             <Tabs.Screen
@@ -46,6 +50,9 @@ export default function ChildrenLayout() {
                 options={{
                     title: '统计',
                     tabBarLabel: '统计',
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="stats-chart-outline" size={size} color={color} />
+                    ),
                 }}
             />
         </Tabs>
