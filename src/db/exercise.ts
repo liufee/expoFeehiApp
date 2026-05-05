@@ -8,14 +8,14 @@ export class ExerciseDatabase {
       console.log('开始初始化数据库...');
       this.db = await SQLite.openDatabaseAsync('exercise.db');
       console.log('数据库打开成功');
-      
+
       if (!this.db) {
         throw new Error('数据库对象为 null');
       }
-      
+
       await this.createTables();
       console.log('表创建成功');
-      
+
       await this.migrateTables();
       console.log('数据库迁移完成');
     } catch (error) {
@@ -77,7 +77,7 @@ export class ExerciseDatabase {
 
     await this.db.runAsync(
       'INSERT INTO records (id, type, start_at, end_at, status, ext, paths, tsr) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [id, record.type, record.start_at, record.end_at, record.status, record.ext, record.paths, record.tsr || '']
+      [id, record.type, record.start_at, record.end_at, record.status, record.ext, record.paths, record.tsr ? 1 : 0]
     );
 
     // 保存 TSR 到单独的表
