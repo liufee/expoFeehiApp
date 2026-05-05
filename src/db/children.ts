@@ -7,7 +7,7 @@ export class ChildrenDatabase {
   async init() {
     try {
       console.log('开始初始化 children 数据库...');
-      this.db = await SQLite.openDatabaseAsync(AppDBBasePath + '/children');
+      this.db = await SQLite.openDatabaseAsync(AppDBBasePath + '/children' + (__DEV__ ? '_debug' : '') );
       console.log('children 数据库打开成功');
 
       if (!this.db) {

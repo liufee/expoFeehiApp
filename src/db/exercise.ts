@@ -6,8 +6,8 @@ export class ExerciseDatabase {
 
   async init() {
     try {
-      console.log('开始初始化数据库...', AppDBBasePath + '/exercise');
-      this.db = await SQLite.openDatabaseAsync(AppDBBasePath + '/exercise');
+      console.log('开始初始化数据库...');
+      this.db = await SQLite.openDatabaseAsync(AppDBBasePath + '/exercise' + (__DEV__ ? '_debug' : ''));
       console.log('数据库打开成功');
 
       if (!this.db) {
