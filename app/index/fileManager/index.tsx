@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import JSZip from 'jszip';
+import {router} from "expo-router";
 
 interface FileItem {
   name: string;
@@ -34,7 +35,7 @@ export default function FileManagerScreen() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? 'light'];
   const insets = useSafeAreaInsets();
-  
+
   const [currentPath, setCurrentPath] = useState<string>(Paths.document.uri);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,7 +66,7 @@ export default function FileManagerScreen() {
         const isDirectory = item instanceof Directory;
         const name = item.name;
         const uri = item.uri;
-        
+
         fileItems.push({
           name: name,
           uri: uri,
@@ -127,7 +128,7 @@ export default function FileManagerScreen() {
 
     try {
       const newFolder = new Directory(currentPath, newFolderName);
-      
+
       if (newFolder.exists) {
         Alert.alert('错误', '文件夹已存在');
         return;
@@ -158,32 +159,32 @@ export default function FileManagerScreen() {
               console.log('开始删除:', item.name);
               console.log('URI:', item.uri);
               console.log('类型:', item.isDirectory ? '目录' : '文件');
-              
+
               if (item.isDirectory) {
                 // 移除 URI 末尾的斜杠，确保路径格式正确
                 const cleanUri = item.uri.endsWith('/') ? item.uri.slice(0, -1) : item.uri;
                 const directory = new Directory(cleanUri);
                 console.log('清理后的 URI:', cleanUri);
                 console.log('目录存在性:', directory.exists);
-                
+
                 if (!directory.exists) {
                   throw new Error('目录不存在');
                 }
-                
+
                 directory.delete();
                 console.log('目录删除成功');
               } else {
                 const file = new File(item.uri);
                 console.log('文件存在性:', file.exists);
-                
+
                 if (!file.exists) {
                   throw new Error('文件不存在');
                 }
-                
+
                 file.delete();
                 console.log('文件删除成功');
               }
-              
+
               await loadFiles();
               Alert.alert('成功', '删除成功');
             } catch (error) {
@@ -221,7 +222,7 @@ export default function FileManagerScreen() {
         const file = new File(renameItem.uri);
         file.rename(newName);
       }
-      
+
       setRenameItem(null);
       setNewName('');
       await loadFiles();
@@ -265,14 +266,14 @@ export default function FileManagerScreen() {
 
       const selectedFile = result.assets[0];
       const isZipFile = selectedFile.name.toLowerCase().endsWith('.zip');
-      
+
       if (isZipFile) {
         // 处理 ZIP 文件
         await importAndExtractZip(selectedFile.uri, selectedFile.name);
       } else {
         // 处理普通文件
         const destPath = `${currentPath}${selectedFile.name}`;
-        
+
         const destFile = new File(destPath);
         if (destFile.exists) {
           Alert.alert(
@@ -315,32 +316,32 @@ export default function FileManagerScreen() {
   const importAndExtractZip = async (zipUri: string, zipName: string) => {
     try {
       setLoading(true);
-      
+
       // 读取 ZIP 文件内容
       const zipData = await FileSystemLegacy.readAsStringAsync(zipUri, {
         encoding: FileSystemLegacy.EncodingType.Base64,
       });
-      
+
       // 加载 ZIP 文件
       const zip = await JSZip.loadAsync(zipData, { base64: true });
-      
+
       // 创建临时文件夹来解压内容
       const tempFolderName = `temp_extract_${Date.now()}`;
       const tempFolderPath = `${currentPath}${tempFolderName}/`;
       const tempFolder = new Directory(tempFolderPath);
       tempFolder.create({ intermediates: true });
-      
+
       // 解压所有文件
       await extractZipContents(zip, tempFolderPath);
-      
+
       // 将解压的内容移动到当前目录
       await moveExtractedContents(tempFolderPath, currentPath);
-      
+
       // 删除临时文件夹
       if (tempFolder.exists) {
         tempFolder.delete();
       }
-      
+
       await loadFiles();
       Alert.alert('成功', 'ZIP 文件解压并导入成功');
     } catch (error) {
@@ -357,15 +358,15 @@ export default function FileManagerScreen() {
       // 遍历 ZIP 中的所有文件
       const promises = Object.keys(zip.files).map(async (relativePath) => {
         const zipEntry = zip.files[relativePath];
-        
+
         // 跳过目录条目
         if (zipEntry.dir) {
           return;
         }
-        
+
         // 构建完整的目标路径
         const fullPath = `${targetPath}${relativePath}`;
-        
+
         // 确保父目录存在
         const lastSlashIndex = fullPath.lastIndexOf('/');
         if (lastSlashIndex > 0) {
@@ -375,16 +376,16 @@ export default function FileManagerScreen() {
             parentDirectory.create({ intermediates: true });
           }
         }
-        
+
         // 获取文件数据
         const fileData = await zipEntry.async('base64');
-        
+
         // 写入文件
         await FileSystemLegacy.writeAsStringAsync(fullPath, fileData, {
           encoding: FileSystemLegacy.EncodingType.Base64,
         });
       });
-      
+
       await Promise.all(promises);
     } catch (error) {
       console.error('解压内容失败:', error);
@@ -399,14 +400,14 @@ export default function FileManagerScreen() {
       if (!sourceDir.exists) {
         return;
       }
-      
+
       const contents = sourceDir.list();
-      
+
       for (const item of contents) {
         const itemName = item.name;
         const sourceItemPath = item.uri;
         const destItemPath = `${destPath}${itemName}`;
-        
+
         if (item instanceof Directory) {
           // 如果是目录，递归移动
           const destDir = new Directory(destItemPath + '/');
@@ -414,7 +415,7 @@ export default function FileManagerScreen() {
             destDir.create({ intermediates: true });
           }
           await moveExtractedContents(sourceItemPath + '/', destItemPath + '/');
-          
+
           // 删除源目录
           const srcDir = new Directory(sourceItemPath + '/');
           if (srcDir.exists) {
@@ -424,12 +425,12 @@ export default function FileManagerScreen() {
           // 如果是文件，移动文件
           const sourceFile = new File(sourceItemPath);
           const destFile = new File(destItemPath);
-          
+
           // 如果目标文件已存在，先删除
           if (destFile.exists) {
             destFile.delete();
           }
-          
+
           sourceFile.move(destFile);
         }
       }
@@ -457,7 +458,7 @@ export default function FileManagerScreen() {
                     Alert.alert('错误', '分享功能不可用');
                     return;
                   }
-                  
+
                   // 移除末尾斜杠后分享
                   const cleanUri = item.uri.endsWith('/') ? item.uri.slice(0, -1) : item.uri;
                   await Sharing.shareAsync(cleanUri);
@@ -532,12 +533,12 @@ export default function FileManagerScreen() {
     // 添加操作按钮
     buttons.push({ text: '重命名', onPress: () => renameItem_start(item) });
     buttons.push({ text: '导出', onPress: () => exportFile(item) });
-    buttons.push({ 
-      text: '删除', 
-      onPress: () => deleteItem(item), 
-      style: 'destructive' as const 
+    buttons.push({
+      text: '删除',
+      onPress: () => deleteItem(item),
+      style: 'destructive' as const
     });
-    
+
     // 最后添加取消按钮
     buttons.push({ text: '取消', style: 'cancel' });
 
@@ -558,7 +559,7 @@ export default function FileManagerScreen() {
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
       {/* 顶部导航栏 */}
-      <View style={[styles.header, { 
+      <View style={[styles.header, {
         backgroundColor: themeColors.card,
         paddingTop: Math.max(insets.top, 12),
       }]}>
@@ -569,7 +570,7 @@ export default function FileManagerScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={themeColors.tint} />
         </TouchableOpacity>
-        
+
         <View style={styles.pathContainer}>
           <Text style={[styles.pathText, { color: themeColors.text }]} numberOfLines={1}>
             {getCurrentPathDisplay()}
@@ -582,6 +583,9 @@ export default function FileManagerScreen() {
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton} onPress={importFile}>
             <Ionicons name="cloud-upload-outline" size={24} color={themeColors.tint} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.headerButton} onPress={() => router.push('/')}>
+            <Ionicons name="arrow-back" size={24} color={themeColors.text} />
           </TouchableOpacity>
         </View>
       </View>
