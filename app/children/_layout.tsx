@@ -10,14 +10,14 @@ export default function ChildrenLayout() {
             }}
         >
             <Tabs.Screen
-                name="WriteBabyEventScreen"
+                name="write"
                 options={{
                     title: '记录',
                     tabBarLabel: '记录',
                 }}
             />
             <Tabs.Screen
-                name="BabyEventStatsScreen"
+                name="stats"
                 options={{
                     title: '统计',
                     tabBarLabel: '统计',

@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import {AppDBBasePath} from "@/constants";
 
 export class ChildrenDatabase {
   private db: SQLite.SQLiteDatabase | null = null;
@@ -6,13 +7,13 @@ export class ChildrenDatabase {
   async init() {
     try {
       console.log('开始初始化 children 数据库...');
-      this.db = await SQLite.openDatabaseAsync('children.db');
+      this.db = await SQLite.openDatabaseAsync(AppDBBasePath + '/children');
       console.log('children 数据库打开成功');
-      
+
       if (!this.db) {
         throw new Error('数据库对象为 null');
       }
-      
+
       await this.createTables();
       console.log('children 表创建成功');
     } catch (error) {
@@ -87,7 +88,7 @@ export class ChildrenDatabase {
     // 更新元数据：先删除旧的，再插入新的
     if (event.meta !== undefined) {
       await this.db.runAsync('DELETE FROM event_meta WHERE event_id = ?', [id]);
-      
+
       if (event.meta && Object.keys(event.meta).length > 0) {
         for (const [key, value] of Object.entries(event.meta)) {
           const metaId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -173,13 +174,13 @@ export class ChildrenDatabase {
 
   async getEventById(id: string): Promise<any> {
     if (!this.db) throw new Error('Database not initialized');
-    
+
     const result = await this.db.getAllAsync('SELECT * FROM events WHERE id = ?', [id]);
     if (result.length === 0) return null;
 
     const event = result[0];
     const meta = await this.getEventMeta(id);
-    
+
     return {
       ...event,
       ...meta,
@@ -188,7 +189,7 @@ export class ChildrenDatabase {
 
   private async getEventMeta(eventId: string): Promise<any> {
     if (!this.db) throw new Error('Database not initialized');
-    
+
     const metaRows = await this.db.getAllAsync(
       'SELECT meta_key, meta_value FROM event_meta WHERE event_id = ?',
       [eventId]

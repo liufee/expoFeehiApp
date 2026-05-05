@@ -264,29 +264,42 @@ export default function AbdominalScreen() {
         if (!player) return;
 
         console.log('注册播放器事件监听器');
+        console.log('当前 duration:', duration);
 
         // 监听播放状态变化
         const playingSubscription = player.addListener('playingChange', ({ isPlaying: playing }) => {
-            console.log('播放状态变化:', playing);
+            console.log('播放状态变化:', playing, 'currentAction:', currentAction);
             setIsPlaying(playing);
+            
+            // 如果从播放变为暂停，且接近视频末尾，可能是播放结束导致的自动暂停
+            if (!playing && isPlaying && duration > 0 && player.currentTime >= duration - 2) {
+                console.log('检测到播放结束（从播放变为暂停且接近末尾）');
+                handleEnd();
+            }
         });
 
         // 监听播放器状态变化（包括 ended）
         const statusSubscription = player.addListener('statusChange', (status) => {
-            console.log('播放器状态变化:', status);
+            console.log('播放器状态变化:', status, 'currentAction:', currentAction);
             // 检查是否是结束状态
-            if (status.status === 'ended' || status.status === 'idle') {
-                console.log('视频播放结束，调用 handleEnd');
+            if ((status.status === 'ended' || status.status === 'idle') && !hasEnded.current) {
+                console.log('视频播放结束（statusChange），调用 handleEnd');
                 handleEnd();
             }
+        });
+
+        // 监听时长变化，用于更新 duration 状态
+        const durationSubscription = player.addListener('durationChange', ({ duration: newDuration }) => {
+            console.log('视频时长变化:', newDuration);
+            setDuration(newDuration);
         });
 
         const timeUpdateSubscription = player.addListener('timeUpdate', ({ currentTime }) => {
             handleProgress({ positionMillis: currentTime * 1000 });
 
             // 通过检查当前时间和时长来判断是否播放结束（留 1 秒余量）
-            if (duration > 0 && currentTime >= duration - 1 && !hasEnded.current && isPlaying) {
-                console.log('检测到视频播放结束（时间判断）', currentTime, duration);
+            if (duration > 0 && currentTime >= duration - 1 && !hasEnded.current) {
+                console.log('检测到视频播放结束（时间判断）', currentTime, duration, 'isPlaying:', isPlaying);
                 handleEnd();
             }
         });
@@ -295,6 +308,7 @@ export default function AbdominalScreen() {
             console.log('移除播放器事件监听器');
             playingSubscription.remove();
             statusSubscription.remove();
+            durationSubscription.remove();
             timeUpdateSubscription.remove();
         };
     }, [player, duration, currentAction, isPlaying]);
