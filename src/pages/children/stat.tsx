@@ -9,9 +9,8 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
     View,
-    Alert,
+    Alert, TextInput,
 } from 'react-native';
-import DatePicker from 'react-native-date-picker';
 import BabyEventItem from './components/BabyEventItem';
 import EventStatCard from './components/EventStatCard';
 import {format} from 'date-fns';
@@ -97,15 +96,9 @@ function DateInput({ label, value, onChange }: {label: string, value: Date, onCh
     return (
         <>
             <TouchableOpacity style={styles.dateInput} onPress={() => setOpen(true)}>
-                <Text style={styles.dateInputLabel}>{label}</Text>
-                <Text style={styles.dateInputValue}>{format(value, 'yyyy-MM-dd')}</Text>
+                <TextInput style={styles.dateInputLabel}>{label}</TextInput>
+                <TextInput style={styles.dateInputValue}>{format(value, 'yyyy-MM-dd')}</TextInput>
             </TouchableOpacity>
-            <DatePicker
-                modal open={open} date={value} mode="date" locale="zh" is24hourSource="locale"
-                onConfirm={(date) => { setOpen(false); onChange(date); }}
-                onCancel={() => setOpen(false)}
-                confirmText="确定" cancelText="取消"
-            />
         </>
     );
 }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
-import DatePicker from 'react-native-date-picker';
 import BabyEventItem from './components/BabyEventItem';
 import {format} from 'date-fns';
 import { childrenService } from '@/src/service/children/children';
@@ -32,15 +31,9 @@ function LabeledDateTime({ label, value, onChange, mode = 'datetime' }:
             <View style={styles.row}>
                 <Text style={styles.label}>{label}</Text>
                 <TouchableOpacity style={styles.input} onPress={()=>setOpen(true)}>
-                    <Text style={styles.inputText}>{format(value, 'yyyy-MM-dd HH:mm:ss')}</Text>
+                    <TextInput style={styles.inputText}>{format(value, 'yyyy-MM-dd HH:mm:ss')}</TextInput>
                 </TouchableOpacity>
             </View>
-            <DatePicker
-                modal open={open} date={value} mode={mode} locale="zh"
-                onConfirm={d=>{ setOpen(false); onChange(d); }}
-                onCancel={()=>setOpen(false)}
-                confirmText="确定" cancelText="取消" minuteInterval={1}
-            />
         </>
     );
 }
