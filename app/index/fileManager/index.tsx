@@ -44,6 +44,7 @@ export default function FileManagerScreen() {
   const [renameItem, setRenameItem] = useState<FileItem | null>(null);
   const [newName, setNewName] = useState('');
   const [pathHistory, setPathHistory] = useState<string[]>([]);
+  const [extractProgress, setExtractProgress] = useState<{visible: boolean; current: number; total: number; currentFile: string}>({visible: false, current: 0, total: 0, currentFile: ''});
 
   useEffect(() => {
     loadFiles();
@@ -316,53 +317,303 @@ export default function FileManagerScreen() {
   const importAndExtractZip = async (zipUri: string, zipName: string) => {
     try {
       setLoading(true);
+      console.log('开始处理ZIP文件:', zipName);
+      console.log('ZIP文件URI:', zipUri);
 
-      // 读取 ZIP 文件内容
-      const zipData = await FileSystemLegacy.readAsStringAsync(zipUri, {
-        encoding: FileSystemLegacy.EncodingType.Base64,
-      });
+      // 获取文件大小
+      const zipFile = new File(zipUri);
+      const fileSize = zipFile.size || 0;
+      console.log('ZIP文件大小:', formatFileSize(fileSize));
 
-      // 加载 ZIP 文件
-      const zip = await JSZip.loadAsync(zipData, { base64: true });
-
-      // 创建临时文件夹来解压内容
-      const tempFolderName = `temp_extract_${Date.now()}`;
-      const tempFolderPath = `${currentPath}${tempFolderName}/`;
-      const tempFolder = new Directory(tempFolderPath);
-      tempFolder.create({ intermediates: true });
-
-      // 解压所有文件
-      await extractZipContents(zip, tempFolderPath);
-
-      // 将解压的内容移动到当前目录
-      await moveExtractedContents(tempFolderPath, currentPath);
-
-      // 删除临时文件夹
-      if (tempFolder.exists) {
-        tempFolder.delete();
+      // 检查文件大小，如果超过50MB给出警告
+      if (fileSize > 50 * 1024 * 1024) {
+        Alert.alert(
+          '文件过大',
+          `ZIP文件大小为 ${formatFileSize(fileSize)}，可能导致内存不足。建议压缩更小的文件或分批处理。`,
+          [
+            { text: '取消', style: 'cancel', onPress: () => setLoading(false) },
+            {
+              text: '继续尝试',
+              onPress: async () => {
+                await processZipFile(zipUri, zipName);
+              }
+            }
+          ]
+        );
+        return;
       }
 
-      await loadFiles();
-      Alert.alert('成功', 'ZIP 文件解压并导入成功');
+      await processZipFile(zipUri, zipName);
     } catch (error) {
       console.error('解压 ZIP 文件失败:', error);
+      setExtractProgress({visible: false, current: 0, total: 0, currentFile: ''});
       Alert.alert('错误', `解压失败: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // 递归解压 ZIP 内容
-  const extractZipContents = async (zip: any, targetPath: string) => {
+  // 处理ZIP文件的实际逻辑 - 使用分块读取避免内存溢出
+  const processZipFile = async (zipUri: string, zipName: string) => {
     try {
-      // 遍历 ZIP 中的所有文件
-      const promises = Object.keys(zip.files).map(async (relativePath) => {
+      console.log('开始处理ZIP文件...');
+
+      // 获取文件信息
+      const zipFile = new File(zipUri);
+      const fileSize = zipFile.size || 0;
+      console.log('ZIP文件大小:', formatFileSize(fileSize));
+
+      // 对于超大文件，给出明确提示
+      if (fileSize > 8000 * 1024 * 1024) {
+        Alert.alert(
+          '文件过大',
+          `ZIP文件大小为 ${formatFileSize(fileSize)}。\n\n由于移动端内存限制，建议：\n• 在电脑上解压后分批导入\n• 或将文件分割成小于100MB的多个ZIP`,
+          [
+            { text: '取消', style: 'cancel', onPress: () => setLoading(false) },
+            {
+              text: '仍然尝试',
+              style: 'destructive',
+              onPress: async () => {
+                await extractLargeZipWithChunks(zipUri, zipName, fileSize);
+              }
+            }
+          ]
+        );
+        return;
+      }
+
+      // 对于中等大小文件，使用优化策略
+      await extractLargeZipWithChunks(zipUri, zipName, fileSize);
+    } catch (error) {
+      console.error('处理ZIP文件失败:', error);
+      setExtractProgress({visible: false, current: 0, total: 0, currentFile: ''});
+      Alert.alert('错误', `解压失败: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 使用分块方式解压大ZIP文件
+  const extractLargeZipWithChunks = async (zipUri: string, zipName: string, fileSize: number) => {
+    let tempFolder: Directory | null = null;
+
+    try {
+      console.log('使用流式处理方式处理ZIP文件');
+
+      // 创建临时文件夹
+      const tempFolderName = `temp_extract_${Date.now()}`;
+      const tempFolderPath = `${currentPath}${tempFolderName}/`;
+      tempFolder = new Directory(tempFolderPath);
+      console.log('创建临时文件夹:', tempFolderPath);
+      tempFolder.create({ intermediates: true });
+
+      // 对于超过200MB的文件，给出警告
+      if (fileSize > 200 * 1024 * 1024) {
+        console.warn('文件非常大，处理可能需要较长时间');
+      }
+
+      // 尝试直接读取整个文件（Expo可能会优化内部实现）
+      console.log('开始读取ZIP文件...');
+      setExtractProgress({
+        visible: true,
+        current: 0,
+        total: 100,
+        currentFile: '读取ZIP文件中...'
+      });
+
+      let zipData: any;
+      try {
+        // 尝试一次性读取，但添加超时和错误处理
+        const base64Data = await Promise.race([
+          FileSystemLegacy.readAsStringAsync(zipUri, {
+            encoding: FileSystemLegacy.EncodingType.Base64,
+          }),
+          new Promise<string>((_, reject) =>
+            setTimeout(() => reject(new Error('读取超时')), 300000) // 5分钟超时
+          )
+        ]);
+
+        console.log('ZIP文件读取完成');
+        zipData = base64Data;
+      } catch (readError) {
+        console.error('一次性读取失败:', readError);
+
+        // 如果失败，尝试使用ArrayBuffer方式分批读取
+        console.log('尝试使用ArrayBuffer分批读取...');
+        zipData = await readZipAsArrayBuffer(zipUri, fileSize);
+      }
+
+      console.log('加载ZIP结构...');
+      setExtractProgress({
+        visible: true,
+        current: 50,
+        total: 100,
+        currentFile: '解析ZIP结构...'
+      });
+
+      // 加载ZIP - JSZip支持base64字符串或ArrayBuffer
+      const zip = await JSZip.loadAsync(zipData, {
+        base64: typeof zipData === 'string'
+      });
+
+      // 立即释放原始数据
+      zipData = '';
+
+      const fileEntries = Object.keys(zip.files).filter(key => !zip.files[key].dir);
+      const fileCount = fileEntries.length;
+      console.log(`ZIP包含 ${fileCount} 个文件`);
+
+      if (fileCount === 0) {
+        throw new Error('ZIP文件中没有可解压的文件');
+      }
+
+      // 解压所有文件
+      setExtractProgress({visible: true, current: 0, total: fileCount, currentFile: '准备解压...'});
+      await extractZipContents(zip, tempFolderPath, fileCount);
+
+      // 释放ZIP对象
+      (zip as any) = null;
+
+      console.log('移动文件到目标目录...');
+      setExtractProgress({
+        visible: true,
+        current: fileCount,
+        total: fileCount,
+        currentFile: '整理文件中...'
+      });
+
+      await moveExtractedContents(tempFolderPath, currentPath);
+
+      // 删除临时文件夹
+      if (tempFolder && tempFolder.exists) {
+        console.log('删除临时文件夹');
+        tempFolder.delete();
+      }
+
+      setExtractProgress({visible: false, current: 0, total: 0, currentFile: ''});
+      await loadFiles();
+      Alert.alert('成功', `ZIP 文件解压并导入成功，共 ${fileCount} 个文件`);
+    } catch (error) {
+      console.error('解压失败:', error);
+      setExtractProgress({visible: false, current: 0, total: 0, currentFile: ''});
+
+      // 清理临时文件夹
+      if (tempFolder && tempFolder.exists) {
+        try {
+          tempFolder.delete();
+        } catch (e) {}
+      }
+
+      const errorMsg = String(error);
+      if (errorMsg.includes('String length') || errorMsg.includes('memory') || errorMsg.includes('Memory')) {
+        throw new Error(`文件过大(${formatFileSize(fileSize)})，超出处理能力。\n\n请在电脑上解压后，分批导入小于50MB的ZIP文件。`);
+      }
+      throw error;
+    }
+  };
+
+  // 将ZIP文件读取为ArrayBuffer（避免Base64字符串长度限制）
+  const readZipAsArrayBuffer = async (zipUri: string, fileSize: number): Promise<ArrayBuffer> => {
+    console.log('使用ArrayBuffer分批读取策略');
+
+    const BATCH_SIZE = 20 * 1024 * 1024; // 20MB per batch
+    const batches: Uint8Array[] = [];
+    let offset = 0;
+
+    while (offset < fileSize) {
+      const endOffset = Math.min(offset + BATCH_SIZE, fileSize);
+      const chunkSize = endOffset - offset;
+
+      const progress = Math.floor((offset / fileSize) * 100);
+      setExtractProgress({
+        visible: true,
+        current: progress,
+        total: 100,
+        currentFile: `读取中 ${progress}% (${formatFileSize(offset)}/${formatFileSize(fileSize)})`
+      });
+
+      console.log(`读取批次: ${Math.floor(offset / BATCH_SIZE) + 1}, 位置: ${formatFileSize(offset)}`);
+
+      try {
+        // 读取当前批次为Base64
+        const chunkBase64 = await FileSystemLegacy.readAsStringAsync(zipUri, {
+          encoding: FileSystemLegacy.EncodingType.Base64,
+          position: offset,
+          length: chunkSize,
+        } as any);
+
+        // 转换为Uint8Array
+        const binaryString = atob(chunkBase64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        batches.push(bytes);
+        offset = endOffset;
+
+        // 释放临时数据
+        (binaryString as any) = null;
+        (chunkBase64 as any) = null;
+
+        // 每2批暂停一下，让GC工作
+        if (batches.length % 2 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+      } catch (readError) {
+        console.error('读取批次失败:', readError);
+        throw new Error(`读取失败于 ${formatFileSize(offset)}`);
+      }
+    }
+
+    console.log('所有批次读取完成，合并为ArrayBuffer...');
+    setExtractProgress({
+      visible: true,
+      current: 100,
+      total: 100,
+      currentFile: '合并数据中...'
+    });
+
+    // 合并所有批次为单个ArrayBuffer
+    const totalLength = batches.reduce((sum, batch) => sum + batch.length, 0);
+    const merged = new Uint8Array(totalLength);
+    let position = 0;
+
+    for (const batch of batches) {
+      merged.set(batch, position);
+      position += batch.length;
+    }
+
+    // 释放批次数组
+    batches.length = 0;
+    (batches as any) = null;
+
+    console.log('合并完成，返回ArrayBuffer');
+    return merged.buffer;
+  };
+
+  // 递归解压 ZIP 内容（带进度）
+  const extractZipContents = async (zip: any, targetPath: string, totalFiles: number) => {
+    try {
+      let processedCount = 0;
+      const fileEntries = Object.keys(zip.files).filter(key => !zip.files[key].dir);
+
+      console.log(`开始解压 ${fileEntries.length} 个文件到: ${targetPath}`);
+
+      // 逐个处理文件以更新进度，避免同时加载太多文件到内存
+      for (const relativePath of fileEntries) {
         const zipEntry = zip.files[relativePath];
 
-        // 跳过目录条目
-        if (zipEntry.dir) {
-          return;
-        }
+        // 更新进度显示
+        processedCount++;
+        const fileName = relativePath.split('/').pop() || relativePath;
+        setExtractProgress({
+          visible: true,
+          current: processedCount,
+          total: totalFiles,
+          currentFile: fileName
+        });
+        console.log(`[${processedCount}/${totalFiles}] 解压: ${relativePath}`);
 
         // 构建完整的目标路径
         const fullPath = `${targetPath}${relativePath}`;
@@ -377,16 +628,66 @@ export default function FileManagerScreen() {
           }
         }
 
-        // 获取文件数据
-        const fileData = await zipEntry.async('base64');
+        // 获取文件数据并写入文件
+        try {
+          // 根据文件大小选择合适的方式
+          let base64Data: string;
 
-        // 写入文件
-        await FileSystemLegacy.writeAsStringAsync(fullPath, fileData, {
-          encoding: FileSystemLegacy.EncodingType.Base64,
-        });
-      });
+          // 尝试使用 blob 方式，对大文件更友好
+          try {
+            const blob = await zipEntry.async('blob');
+            // 将 Blob 转换为 Base64
+            const reader = new FileReader();
+            base64Data = await new Promise((resolve, reject) => {
+              reader.onloadend = () => {
+                const result = reader.result as string;
+                // 移除 data:*/*;base64, 前缀
+                resolve(result.split(',')[1]);
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+          } catch (blobError) {
+            console.warn('Blob方式失败，使用uint8array方式:', blobError);
+            // 回退到 uint8array 方式
+            const fileData = await zipEntry.async('uint8array');
 
-      await Promise.all(promises);
+            // 将 Uint8Array 转换为 Base64（分块处理大文件）
+            const CHUNK_SIZE = 0x8000; // 32KB chunks
+            const chunks = [];
+            for (let i = 0; i < fileData.length; i += CHUNK_SIZE) {
+              const chunk = fileData.slice(i, i + CHUNK_SIZE);
+              chunks.push(String.fromCharCode.apply(null, Array.from(chunk)));
+            }
+            base64Data = btoa(chunks.join(''));
+          }
+
+          // 写入文件
+          await FileSystemLegacy.writeAsStringAsync(fullPath, base64Data, {
+            encoding: FileSystemLegacy.EncodingType.Base64,
+          });
+
+          // 立即释放内存
+          base64Data = '';
+
+          console.log(`[${processedCount}/${totalFiles}] 完成: ${fileName}`);
+        } catch (writeError) {
+          console.error(`写入文件失败: ${relativePath}`, writeError);
+          throw new Error(`无法写入文件: ${fileName}`);
+        }
+
+        // 每处理5个文件，尝试触发垃圾回收（如果可用）
+        if (processedCount % 5 === 0) {
+          // 给JS引擎一点时间进行垃圾回收
+          await new Promise(resolve => setTimeout(resolve, 10));
+
+          if (global.gc) {
+            global.gc();
+          }
+        }
+      }
+
+      console.log('所有文件解压完成');
     } catch (error) {
       console.error('解压内容失败:', error);
       throw error;
@@ -649,6 +950,44 @@ export default function FileManagerScreen() {
         </View>
       </Modal>
 
+      {/* 解压进度模态框 */}
+      <Modal
+        visible={extractProgress.visible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => {}}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
+            <Text style={[styles.modalTitle, { color: themeColors.text }]}>处理中...</Text>
+
+            <View style={styles.progressContainer}>
+              <Text style={[styles.progressText, { color: themeColors.text }]} numberOfLines={2}>
+                {extractProgress.currentFile}
+              </Text>
+
+              <View style={styles.progressBarBg}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${extractProgress.total > 0 ? (extractProgress.current / extractProgress.total) * 100 : 0}%`,
+                      backgroundColor: themeColors.tint
+                    }
+                  ]}
+                />
+              </View>
+
+              <Text style={[styles.progressDetail, { color: themeColors.placeholderText }]}>
+                {extractProgress.total > 100
+                  ? `${extractProgress.current} / ${extractProgress.total} 文件`
+                  : `${extractProgress.current}%`}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* 重命名模态框 */}
       <Modal
         visible={renameItem !== null}
@@ -837,5 +1176,29 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: '500',
+  },
+  progressContainer: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    minHeight: 40,
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 8,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  progressDetail: {
+    fontSize: 12,
   },
 });
