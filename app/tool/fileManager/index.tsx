@@ -76,11 +76,6 @@ export default function FileManagerScreen() {
           size: isDirectory ? (item as Directory).size || undefined : (item as File).size || undefined,
           modificationTime: isDirectory ? undefined : (item as File).modificationTime || undefined,
         });
-
-        // 调试日志：打印文件的时间戳
-        if (!isDirectory && (item as File).modificationTime) {
-          console.log(`文件 ${name} 的时间戳:`, (item as File).modificationTime);
-        }
       }
 
       // 排序：文件夹在前，文件在后，按名称排序

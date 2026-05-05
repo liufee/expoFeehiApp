@@ -17,7 +17,7 @@ export class ExerciseDatabase {
       await this.createTables();
       console.log('表创建成功');
 
-      await this.migrateTables();
+      //await this.migrateTables();
       console.log('数据库迁移完成');
     } catch (error) {
       console.error('Failed to initialize database:', error);
