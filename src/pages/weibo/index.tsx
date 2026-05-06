@@ -8,7 +8,6 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import {WeiboItem} from './components/WeiboItem';
 import WeiboService, {NewsService} from '../../service/weibo';
 import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
@@ -17,6 +16,7 @@ import {AppWeiboBasePath} from '../../../constants';
 import Composer from './components/Composer';
 import {Weibo} from '../../service/weibo/model';
 import defaultSetting from "@/src/service/setting/defaultSetting";
+import {Picker} from '../../components/picker';
 
 export const tabPressEmitter = new EventEmitter();
 const draftFile = AppWeiboBasePath + '/draft';
@@ -114,14 +114,13 @@ const WeiboIndex = ({}) => {
                 {/* 账号切换 */}
                 <View style={styles.usernameContainer}>
                     <Picker
-                        selectedValue={uid as any}
+                        selectedValue={uid}
                         onValueChange={handleUsernameChange}
-                        style={styles.picker}
-                    >
-                        {[{'id': '0', 'name': '全部', 'avatar': ''}, ...enabledUsers].map((user) => (
-                            <Picker.Item key={user.id} label={user.name} value={user.id as any} />
-                        ))}
-                    </Picker>
+                        items={[{'name': '全部', 'value': '0'}, ...enabledUsers.map(user => ({'name': user.name, 'value': user.id}))]}
+                        placeholder="选择账号"
+                        style={{height: 30,padding:0,margin:0}}
+                        textStyle={{fontSize: 7,margin:0,padding:0}}
+                    />
                 </View>
                 {/* 发布微博区域 */}
                 <Composer
@@ -184,14 +183,8 @@ const styles = StyleSheet.create({
     usernameContainer: {
         zIndex:111,
         left:15,
-        width:200,
         top:-12,
         position: 'absolute',
-    },
-    picker: {
-        width: 180,
-        height: 50,
-        zIndex: 111,
     },
     loadingText: {
         textAlign: 'center',
