@@ -1,6 +1,9 @@
 import * as Crypto from 'expo-crypto';
 import { File } from 'expo-file-system';
 
+// 声明全局 Buffer 类型
+declare var Buffer: any;
+
 // 注意：在生产环境中应使用有效的SSL证书，以下方案仅用于开发环境测试自签名证书
 export async function generateTSR(data: string): Promise<[boolean, string]> {
   try {
@@ -35,7 +38,7 @@ export async function parseTSR(data: string): Promise<[boolean, any]> {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ data }),
+      body: JSON.stringify({ tsr:data }),
     });
 
     if (!response.ok) {
@@ -103,8 +106,7 @@ export const assembleStrToCreateTSR = async (str, mediaStr) => {
     const mediaPaths = mediaStr.split(",");
 
     // 我们需要一个容器来模拟 Go 的 h.Write([]byte) 连续写入
-    // 注意：在 Expo Go 中处理大文件时，拼接 Base64 字符串是唯一的手段
-    let combinedBase64 = "";
+    let combinedBytes: any;
 
     try {
       for (let m of mediaPaths) {
@@ -114,23 +116,21 @@ export const assembleStrToCreateTSR = async (str, mediaStr) => {
 
         /**
          * 对应 Go: os.Open(m) 和 io.CopyBuffer(h, f, buf)
-         * 因为 Go 是直接将文件二进制流写入 hash 对象，
-         * 我们通过 readAsStringAsync 以 Base64 读取，这样能保证二进制数据的完整性。
+         * 使用 File 类的 base64() 方法读取文件内容
          */
-        const fileContent = await FileSystem.readAsStringAsync(m, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
+        const mediaFile = new File(m);
+        const fileContent = mediaFile.base64();
 
         // 将不同文件的 Base64 转换回原始二进制数据并合并
         // 注意：简单的字符串拼接 Base64 是不行的，因为 Base64 有补位符 (=)
         // 我们需要通过 Buffer 将其还原为字节流再合并，以确保哈希值 100% 匹配
-        const fileBuffer = Buffer.from(fileContent, 'base64');
+        const fileBuffer = (Buffer as any).from(fileContent, 'base64');
 
         // 这一步模拟了 Go 的 h.Write(f)
         if (typeof combinedBytes === 'undefined') {
-          var combinedBytes = fileBuffer;
+          combinedBytes = fileBuffer;
         } else {
-          combinedBytes = Buffer.concat([combinedBytes, fileBuffer]);
+          combinedBytes = (Buffer as any).concat([combinedBytes, fileBuffer]);
         }
       }
 
