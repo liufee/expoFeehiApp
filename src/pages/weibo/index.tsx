@@ -52,9 +52,6 @@ const WeiboIndex = ({}) => {
             tabPressEmitter.removeAllListeners('refresh');
         };
     }, [loadNews, loadMoreWeibos]);
-    useEffect(()=>{
-        console.log(111)
-    }, [])
     const loadNews = async() => {
         if (topIsLoading) {
             return;
