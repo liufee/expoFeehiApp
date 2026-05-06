@@ -476,11 +476,11 @@ export default class WeiboService{
         if(!success){
             return [false, str];
         }
-        let result = await generateTSR(str);
-        if (result.indexOf('error:') === 0){
-            return [false, result];
+        const [ok, tsr] = await generateTSR(str);
+        if (!ok){
+            return [false, ''];
         }
-        return [true, result];
+        return [true, tsr];
     }
 
     private async  getUsersMap(uids:string[]):Promise<Map<string, User>>{
