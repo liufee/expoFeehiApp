@@ -236,6 +236,15 @@ export class ExerciseService {
       };
     });
 
+    // 对每日锻炼记录按日期排序
+    dailyExercises.sort((a, b) => {
+      if (sortOrder.toLowerCase() === 'asc') {
+        return a.date.localeCompare(b.date);
+      } else {
+        return b.date.localeCompare(a.date);
+      }
+    });
+
     return [true, dailyExercises, ''];
   }
 

@@ -167,8 +167,12 @@ export class ExerciseDatabase {
   ): Promise<any[]> {
     if (!this.db) throw new Error('Database not initialized');
 
-    if (!['asc', 'desc'].includes(sortOrder.toLowerCase())) {
+    // 规范化排序参数，只接受 'asc' 或 'desc'
+    const normalizedSortOrder = sortOrder.toLowerCase();
+    if (!['asc', 'desc'].includes(normalizedSortOrder)) {
       sortOrder = 'desc';
+    } else {
+      sortOrder = normalizedSortOrder;
     }
 
     const params: any[] = [];
@@ -193,7 +197,8 @@ export class ExerciseDatabase {
 
     const whereSQL = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
-    let query = `SELECT * FROM exercise ${whereSQL} ORDER BY start_at ${sortOrder.toUpperCase()}`;
+    // 使用小写的排序参数（SQLite 不区分大小写，但保持一致性）
+    let query = `SELECT * FROM exercise ${whereSQL} ORDER BY start_at ${sortOrder}`;
 
     if (page !== -1) {
       const offset = (page - 1) * perPage;
