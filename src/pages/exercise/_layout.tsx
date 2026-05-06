@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { exerciseService } from '@/src/service/exercise/exercise';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 export default function ExerciseLayout() {
@@ -30,10 +31,11 @@ export default function ExerciseLayout() {
   }
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-      }}>
+    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+        }}>
       <Tabs.Screen
         name="abdominal"
         options={{
@@ -70,6 +72,7 @@ export default function ExerciseLayout() {
           ),
         }}
       />
-    </Tabs>
+      </Tabs>
+    </SafeAreaView>
   );
 }
