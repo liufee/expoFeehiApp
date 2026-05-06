@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, Switch, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {useSetting} from '@/src/provider/setting';
 import {Setting} from '@/src/service/setting';
 import {usernames} from '@/src/service/weibo/data';
@@ -92,6 +93,7 @@ const SettingsScreen = () => {
     const [localSetting, setLocalSetting] = useState<Setting>(setting);
     const {showLoading, hideLoading} = useLoading();
     const {showToast} = useToast();
+    const insets = useSafeAreaInsets();
 
     useEffect(() => {
         setLocalSetting(setting);
@@ -160,7 +162,7 @@ const SettingsScreen = () => {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
             <ScrollView>
                 <Text style={styles.header}>应用设置</Text>
                 {/* 数据库设置 */}
