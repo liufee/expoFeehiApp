@@ -44,4 +44,3 @@ app-example
 .idea
 src/config/config.dev.ts
 src/config/config.release.ts
-src/service/setting/defaultSetting.ts

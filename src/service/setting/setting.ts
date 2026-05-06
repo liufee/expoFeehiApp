@@ -40,7 +40,7 @@ export default class SettingService{
                 configDir.create({ intermediates: true });
             }
             const configFile = new File(SettingService.CONFIG_STORAGE_KEY);
-            await configFile.writeAsync(JSON.stringify(setting), { encoding: 'utf8' });
+            await configFile.write(JSON.stringify(setting), { encoding: 'utf8' });
             return [true, ''];
         } catch (error) {
             return [false, userErrorMessage(error)];
