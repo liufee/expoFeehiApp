@@ -149,7 +149,7 @@ class Weibo{
             CREATE TABLE IF NOT EXISTS tsr (
                 type text,
                 third_id text,
-                tsr,
+                tsr text,
                 PRIMARY KEY (type, third_id)
             );
         `);
