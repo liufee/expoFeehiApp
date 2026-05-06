@@ -15,7 +15,7 @@ import { WeiboItem } from './components/WeiboItem';
 import WeiboService from '../../service/weibo';
 import { format, set } from 'date-fns';
 import DatePickerPanel from '../../components/datePickerPanel';
-import {Picker} from '@react-native-picker/picker';
+import {Picker} from '../../components/picker';
 import {useSetting} from '../../provider/setting';
 import {getEnabledUsers} from '../../service/weibo/data';
 
@@ -119,14 +119,13 @@ const WeiboSearch = ({}) => {
         <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             <View style={styles.searchContainer}>
                 <Picker
-                    selectedValue={uid as any}
+                    selectedValue={uid}
                     onValueChange={(itemValue) => setUid(itemValue)}
-                    style={styles.picker}
-                >
-                    {[{'id': '0', 'name': '全部', 'avatar': ''}, ...enabledUsers].map((user) => (
-                        <Picker.Item key={user.id} label={user.name} value={user.id as any} />
-                    ))}
-                </Picker>
+                    items={[{'name': '全部', 'value': '0'}, ...enabledUsers.map(user => ({'name': user.name, 'value': user.id}))]}
+                    placeholder="选择账号"
+                    style={{height: 40,padding:0,margin:0,width:100,}}
+                    textStyle={{fontSize: 12,margin:0,padding:0}}
+                />
                 <TextInput
                     style={styles.input}
                     value={keyword}
@@ -220,11 +219,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         padding: 10,
         color: '#888',
-    },
-    picker: {
-        height: 50,
-        width: 110,
-    },
+    }
 });
 
 export default WeiboSearch;

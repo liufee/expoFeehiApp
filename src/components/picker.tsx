@@ -110,7 +110,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#ddd',
-        minWidth: 120,
     },
     pickerText: {
         fontSize: 16,

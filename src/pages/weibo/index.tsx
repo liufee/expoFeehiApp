@@ -189,10 +189,8 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     usernameContainer: {
-        zIndex:111,
-        left:15,
-        top:-12,
-        position: 'absolute',
+        zIndex: 111,
+        marginBottom: 10,
     },
     loadingText: {
         textAlign: 'center',
