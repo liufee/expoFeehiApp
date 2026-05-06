@@ -20,6 +20,7 @@ interface PickerProps {
     placeholder?: string;
     style?: any;
     textStyle?: any;
+    buttonStyle?: any;
 }
 
 export const Picker: React.FC<PickerProps> = ({
@@ -29,6 +30,7 @@ export const Picker: React.FC<PickerProps> = ({
     placeholder = '请选择',
     style,
     textStyle,
+    buttonStyle,
 }) => {
     const [modalVisible, setModalVisible] = useState(false);
     
@@ -43,8 +45,8 @@ export const Picker: React.FC<PickerProps> = ({
 
     return (
         <View style={[styles.container, style]}>
-            <TouchableOpacity 
-                style={styles.pickerButton}
+            <TouchableOpacity
+                style={[styles.pickerButton, buttonStyle]}
                 onPress={() => setModalVisible(true)}
             >
                 <Text numberOfLines={1} style={[styles.pickerText, textStyle]}>{displayText}</Text>

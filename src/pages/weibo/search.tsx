@@ -125,6 +125,7 @@ const WeiboSearch = ({}) => {
                     placeholder="选择账号"
                     style={{height: 40,padding:0,margin:0,width:100,}}
                     textStyle={{fontSize: 12,margin:0,padding:0}}
+                    buttonStyle={{borderRadius: 0,marginRight:5}}
                 />
                 <TextInput
                     style={styles.input}

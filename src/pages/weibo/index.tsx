@@ -126,8 +126,9 @@ const WeiboIndex = ({}) => {
                         onValueChange={handleUsernameChange}
                         items={[{'name': '全部', 'value': '0'}, ...enabledUsers.map(user => ({'name': user.name, 'value': user.id}))]}
                         placeholder="选择账号"
-                        style={{height: 30,padding:0,margin:0}}
-                        textStyle={{fontSize: 7,margin:0,padding:0}}
+                        style={{width:80}}
+                        textStyle={{fontSize: 12,margin:0,padding:0}}
+                        buttonStyle={{paddingHorizontal:1,paddingVertical:1}}
                     />
                 </View>
                 {/* 发布微博区域 */}
@@ -190,7 +191,9 @@ const styles = StyleSheet.create({
     },
     usernameContainer: {
         zIndex: 111,
-        marginBottom: 10,
+        position: 'absolute',
+        right: 10,
+        top: 30,
     },
     loadingText: {
         textAlign: 'center',
