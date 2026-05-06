@@ -16,7 +16,7 @@ import {getEnabledUsers} from '../../service/weibo/data';
 import {AppWeiboBasePath} from '../../../constants';
 import Composer from './components/Composer';
 import {Weibo} from '../../service/weibo/model';
-import defaultSetting from "@/src/service/setting/defaultSetting";
+import {useSetting} from '../../provider/setting';
 import {Picker} from '../../components/picker';
 
 export const tabPressEmitter = new EventEmitter();
@@ -25,6 +25,7 @@ const limit = 10;
 
 const WeiboIndex = ({}) => {
     const insets = useSafeAreaInsets();
+    const { setting } = useSetting();
 
     const [weibos, setWeibos] = useState<Weibo[]>([]); // 微博列表
     const [page, setPage] = useState(1);
@@ -37,6 +38,11 @@ const WeiboIndex = ({}) => {
 
     const weiboService = WeiboService.getInstance();
     const newsService = NewsService.getInstance();
+
+    useEffect(() => {
+        // 设置 weiboService 的 setting
+        weiboService.setSetting(setting);
+    }, [setting]);
 
     useEffect(() => {
         const refreshListener = async() => {
@@ -128,7 +134,7 @@ const WeiboIndex = ({}) => {
                 <Composer
                     uid={uid}
                     draftFile={draftFile}
-                    setting={defaultSetting}
+                    setting={setting}
                     weiboService={weiboService}
                     quoteWeibo={null}
                     onPosted={async () => {

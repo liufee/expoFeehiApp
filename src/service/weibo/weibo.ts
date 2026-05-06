@@ -16,6 +16,7 @@ import {
 } from './data';
 import {userErrorMessage} from '../../util';
 import {weiboDB} from "@/src/db/weibo";
+import {Setting} from "@/src/service/setting/types";
 import defaultSetting from "@/src/service/setting/defaultSetting";
 import {assembleStrToCreateTSR, generateTSR} from "@/src/util/tsr";
 
@@ -31,6 +32,10 @@ export default class WeiboService{
             WeiboService.instance = new WeiboService();
         }
         return WeiboService.instance;
+    }
+
+    public setSetting(setting: Setting): void {
+        this.setting = setting;
     }
     async initDB(): Promise<void> {
         if (!this.dbInitialized) {
