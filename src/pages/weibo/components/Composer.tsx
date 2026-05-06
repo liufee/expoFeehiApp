@@ -23,7 +23,7 @@ import {formatWeiboContent, getCurrentLocationWithAddress} from '../util';
 import {Asset, mediaPicker, checkMediaSize, confirmMediaSizeIfNeeded} from '../util/mediaPicker';
 import {MediaPreview} from './MediaPreview';
 import {EmojiPanel} from './EmojPanel';
-import {useToast} from "@/src/provider";
+import {useLoading, useToast} from "@/src/provider";
 
 type Props = {
     uid: string;
@@ -40,6 +40,7 @@ type Props = {
 
 export const Composer = ({uid, draftFile, setting, weiboService, repostWeibo = null, onPosted}: Props) => {
     const {showToast} = useToast();
+    const {showLoading, hideLoading} = useLoading();
 
     const [text, setText] = useState('');
     const [selection, setSelection] = useState({start: 0, end: 0});

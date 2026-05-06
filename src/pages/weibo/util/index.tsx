@@ -3,6 +3,7 @@ import React from 'react';
 import {Coordinates, Location} from '../../../service/weibo/model';
 import config from '../../../config';
 import {getEmojiMap} from '../../../service/weibo/emoj';
+import * as expoLoc from 'expo-location';
 
 export const formatWeiboContent = (html) => {
         const regex = /(\[([^\]]+)\])|(<a\s+[^>]*?href\s*=\s*(?:"([^"]+)"|'([^']+)'|([^>\s]+))[^>]*?>([\s\S]*?)<\/a>)|(<img\s+[^>]*?src\s*=\s*(?:"([^"]+)"|'([^']+)'|([^>\s]+))[^>]*?>)/gi;
@@ -169,39 +170,30 @@ export function findFirstWithinDistance(point: Coordinates, locations: Location[
 }
 
 export async function getCurrentLocationWithAddress():Promise<[boolean, Location|null, string]> {
-    await NativeModules.RNHelper.initAMapSDK(config.gaoDeAPIKey.android);
-
-    let needRetry = true;
-    let loc: any = '';
-    while (needRetry) {
-        try {
-            loc = await NativeModules.RNHelper.getCurrentLocation();
-            //await new Promise<void>(resolve => setTimeout(resolve, 3000));
-            //loc = {longitude:113.848767, latitude:22.600988}
-            break;
-        } catch (e: any) {
-            if (e.toString().indexOf('INVALID_USER_SCODE') !== -1) {
-                needRetry = true;
-            } else {
-                needRetry = false;
-            }
-        }
+    let loc:any;
+    try {
+        loc = await expoLoc.getCurrentPositionAsync({
+            accuracy: expoLoc.Accuracy.Highest,
+            timeInterval: 0,
+            mayShowUserSettingsDialog: true
+        });
+    }catch (e){
+        return [false, null, '定位失败:' + e.toString()];
     }
-
     if (!loc){
         return [false, null, '定位失败，信号丢失'];
     }
 
     let address = '';
 
-    const localMatch = findFirstWithinDistance({ longitude: loc.longitude, latitude: loc.latitude }, config.locations, 100);
+    const localMatch = findFirstWithinDistance({ longitude: loc.coords.longitude, latitude: loc.coords.latitude }, config.locations, 100);
 
     if (localMatch) {
         address = localMatch.address;
     } else {
         try {
             const response = await fetch(
-                `https://restapi.amap.com/v3/geocode/regeo?key=${config.gaoDeAPIKey.web}&location=${loc.longitude},${loc.latitude}`
+                `https://restapi.amap.com/v3/geocode/regeo?key=${config.gaoDeAPIKey.web}&location=${loc.coords.longitude},${loc.coords.latitude}`
             );
             if (!response.ok) {
                 return [false, null, '定位失败,调接口坐标转地址失败:' + response.status + ',' + response.statusText];
