@@ -12,6 +12,7 @@ import {useNavigation} from '@react-navigation/native';
 import {formatNewsContent, formatWeiboContent} from '../util';
 import WeiboService from '../../../service/weibo';
 import {Media} from './Media';
+import { router } from 'expo-router';
 
 interface WeiboItemProps {
     item: Weibo;
@@ -52,7 +53,7 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
 
     // 跳转详情
     const viewWeiboDetail = (weibo:Weibo) => {
-        navigation.navigate('WeiboDetail' as any, { wb: weibo, uid:uid } as any);
+        router.navigate('detail' as any, { wb: weibo, uid:uid } as any);
     };
 
     // 删除微博

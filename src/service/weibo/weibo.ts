@@ -1,6 +1,6 @@
 import {Comment, Weibo, Media, By, User, Like, TSR, BeenPosted, Location} from './model';
 import {format} from 'date-fns';
-import * as FileSystem from 'expo-file-system';
+import { File, Directory, Paths } from 'expo-file-system';
 import {NativeModules} from 'react-native';
 import {
     AppPicturesBasePath,
@@ -126,9 +126,9 @@ export default class WeiboService{
         try {
             for (let i in weibo.media) {
                 const path = weibo.media[i].Origin;
-                const fileInfo = await FileSystem.getInfoAsync(path);
-                if (fileInfo.exists) {
-                    await FileSystem.deleteAsync(path);
+                const file = new File(path);
+                if (file.exists) {
+                    file.delete();
                 }
             }
             const result = await weiboDB.deleteWeibo(weibo.id);
@@ -418,9 +418,8 @@ export default class WeiboService{
             let mediaContents = '';
             for(let i in weibo.media){
                 const item = weibo.media[i];
-                const base64Content = await FileSystem.readAsStringAsync(item.Origin, {
-                    encoding: FileSystem.EncodingType.Base64,
-                });
+                const file = new File(item.Origin);
+                const base64Content = await file.readAsync({ encoding: 'base64' });
                 mediaContents += base64Content;
             }
             return [true, `${createdAt}+${weibo.text}+${mediaContents}`];
@@ -435,21 +434,20 @@ export default class WeiboService{
 
     public async saveMediaToLocal(mediaPath: string):Promise<[boolean, string]>{
         try {
-            const destPath = AppPicturesBasePath;
-            const dirExists = await FileSystem.getInfoAsync(destPath);
-            if (!dirExists.exists) {
-                await FileSystem.makeDirectoryAsync(destPath, {intermediates: true});
+            const destDir = new Directory(AppPicturesBasePath);
+            if (!destDir.exists) {
+                destDir.create({ intermediates: true });
             }
-            const filename = mediaPath.split('/').pop();
-            const fullPath = destPath + '/' + filename;
+            const filename = mediaPath.split('/').pop() || 'unknown';
+            const destFile = new File(destDir, filename);
 
-            await FileSystem.makeDirectoryAsync(destPath, {intermediates: true});
             if(mediaPath.startsWith('http://') || mediaPath.startsWith('https://')){
-                await FileSystem.downloadAsync(mediaPath, fullPath);
+                await File.downloadFileAsync(mediaPath, destDir);
             }else {
-                await FileSystem.copyAsync({from: mediaPath, to: fullPath});
+                const sourceFile = new File(mediaPath);
+                sourceFile.copy(destFile);
             }
-            return [true, fullPath];
+            return [true, destFile.uri];
         } catch (e) {
             return [false, userErrorMessage(e)];
         }
@@ -554,7 +552,7 @@ export default class WeiboService{
             if(media.LivePhoto !== '') {
                 media.Origin = media.LivePhoto.startsWith('http') ? media.LivePhoto : basePath + '/' + media.LivePhoto;
             }
-            if(media.IsLarge && !(await FileSystem.getInfoAsync(media.Origin)).exists){//如果大文件尝试看一下 media.Origin 是否存在，否则替换成远端文件地址
+            if(media.IsLarge && !(new File(media.Origin).exists)){//如果大文件尝试看一下 media.Origin 是否存在，否则替换成远端文件地址
                 media.Origin = 'http://192.168.1.2:8080/weibo/file?path=' + (media.Origin.startsWith(basePath) ? media.Origin.slice(basePath.length) : '');
             }
             if( tempMap.has(attachment.third_id) ){
@@ -675,22 +673,23 @@ export default class WeiboService{
         const filePath = `${uid}/${year}/${month}`;
         let basePath = '';
         try {
-            const fileInfo = await FileSystem.getInfoAsync(sourcePath);
-            const isLarge = (fileInfo.size || 0) > WeiboService.LargeFileAtLeastSize;
+            const sourceFile = new File(sourcePath);
+            const isLarge = sourceFile.size > WeiboService.LargeFileAtLeastSize;
             if(isLarge){
                 basePath = `${AppWeiboLargeBasePath}/${filePath}`;
             }else{
                 basePath = `${AppWeiboBasePath}/${filePath}`;
             }
             // 检查目录是否存在
-            const dirExists = await FileSystem.getInfoAsync(basePath);
-            if (!dirExists.exists) {
-                await FileSystem.makeDirectoryAsync(basePath, {intermediates: true}); // 创建目录
+            const destDir = new Directory(basePath);
+            if (!destDir.exists) {
+                destDir.create({ intermediates: true }); // 创建目录
             }
-            const wholePath = `${basePath}/${fileName}`;
-            await FileSystem.copyAsync({from: sourcePath, to: wholePath});
+            const destFile = new File(destDir, fileName);
+            sourceFile.copy(destFile);
             return [true, filePath + '/' + fileName, isLarge];
         } catch (e) {
+            console.log(e)
             return [false, userErrorMessage(e), false];
         }
     }

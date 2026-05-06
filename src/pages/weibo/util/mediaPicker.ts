@@ -2,6 +2,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import {getABSPath, userErrorMessage} from '../../../util';
 import {Alert} from 'react-native';
+import {showToast} from '../../../provider/toast-helper';
 
 export interface Asset{
     uri: string,

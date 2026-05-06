@@ -9,16 +9,16 @@ import {
     Alert,
     ScrollView, Pressable, Keyboard,
 } from 'react-native';
-import {BeenPosted, Comment, Like, Weibo} from '../../services/weibo/model';
-import WeiboService from '../../services/weibo';
+import {BeenPosted, Comment, Like, Weibo} from '../../service/weibo/model';
+import WeiboService from '../../service/weibo';
 import {WeiboItem} from './components/WeiboItem';
 import {useNavigation} from '@react-navigation/native';
 import Checkbox from '../../components/checkbox';
 import Button from '../../components/button';
 import {formatWeiboContent, getCurrentLocationWithAddress} from './util';
-import {useSetting} from '../../provider/setting';
 import {useToast} from '../../provider/toast';
 import {useLoading} from '../../provider/loading';
+import {useSetting} from '../../provider/setting';
 import {Media} from './components/Media';
 import {LocationEditor} from './components/LocationEditor';
 import {Asset, mediaPicker, checkMediaSize, confirmMediaSizeIfNeeded} from './util/mediaPicker';
@@ -52,7 +52,7 @@ const WeiboDetail = ({ route }) => {
     const {showToast} = useToast();
     const {showLoading, hideLoading} = useLoading();
 
-    const {selectMedia, selectAttachment} = mediaPicker(showToast);
+    const {selectMedia, selectAttachment} = mediaPicker();
 
     const weiboService:WeiboService = WeiboService.getInstance();
 

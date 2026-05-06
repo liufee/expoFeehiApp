@@ -43,6 +43,13 @@ export default function ExerciseLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="detail"
+        options={{
+          title: '详情',
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

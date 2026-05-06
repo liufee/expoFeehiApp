@@ -5,7 +5,7 @@ import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { ToastProvider } from '@/src/provider';
+import { ToastProvider, LoadingProvider, SettingProvider } from '@/src/provider';
 
 export const unstable_settings = {
   anchor: 'index',
@@ -18,17 +18,21 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <ToastProvider>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-            <Stack.Screen name="exercise" options={{ headerShown: false }} />
-            <Stack.Screen name="children" options={{ headerShown: false }} />
-            <Stack.Screen name="tool" options={{ headerShown: false }} />
-            <Stack.Screen name="weibo" options={{ headerShown: true }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ToastProvider>
+        <SettingProvider>
+          <ToastProvider>
+            <LoadingProvider>
+              <Stack>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+                <Stack.Screen name="exercise" options={{ headerShown: false }} />
+                <Stack.Screen name="children" options={{ headerShown: false }} />
+                <Stack.Screen name="tool" options={{ headerShown: false }} />
+                <Stack.Screen name="weibo" options={{ headerShown: true }} />
+              </Stack>
+              <StatusBar style="auto" />
+            </LoadingProvider>
+          </ToastProvider>
+        </SettingProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );
