@@ -4,7 +4,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {useSetting} from '../../provider/setting';
 import { SvgXml } from 'react-native-svg';
 import Loading from '../../components/loading';
-import WeiboService, {NewsService} from '../../services/weibo';
+import WeiboService, {NewsService} from '../../service/weibo';
 import AiScreen from './AiScreen';
 import HotSearchScreen from './HotSearchScreen';
 import WeiboIndex,{tabPressEmitter} from './IndexScreen';

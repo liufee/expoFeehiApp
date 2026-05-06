@@ -1,17 +1,16 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-import {useRoute} from '@react-navigation/native';
-import WeiboService from '../../services/weibo';
+import { useLocalSearchParams } from 'expo-router';
+import WeiboService from '../../service/weibo';
 import Composer from './components/Composer';
 import {useSetting} from '../../provider/setting';
-import {AppWeiboBasePath} from '../../constant';
+import {AppWeiboBasePath} from '../../../constants';
 
 export default function RepostScreen() {
-    const route = useRoute<any>();
-
-    const uid = route.params?.uid ?? '0';
-    const repostWeibo = route.params?.repostWeibo ?? null;
-    const onPosted = route.params?.onPosted;
+    const params = useLocalSearchParams();
+    
+    const uid = params.uid as string || '0';
+    const repostWeibo = params.repostWeibo ? JSON.parse(params.repostWeibo as string) : null;
 
     const weiboService:WeiboService = WeiboService.getInstance();
 
@@ -25,7 +24,9 @@ export default function RepostScreen() {
                 setting={setting}
                 weiboService={weiboService}
                 repostWeibo={repostWeibo}
-                onPosted={onPosted}
+                onPosted={async () => {
+                    // 转发成功后返回
+                }}
             />
         </View>
     );

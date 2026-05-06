@@ -12,7 +12,7 @@ import {
 import {BeenPosted, Comment, Like, Weibo} from '../../service/weibo/model';
 import WeiboService from '../../service/weibo';
 import {WeiboItem} from './components/WeiboItem';
-import {useNavigation} from '@react-navigation/native';
+import { router, useLocalSearchParams } from 'expo-router';
 import Checkbox from '../../components/checkbox';
 import Button from '../../components/button';
 import {formatWeiboContent, getCurrentLocationWithAddress} from './util';
@@ -30,8 +30,11 @@ enum ShowTypes {
     ShowTypeLike = 'like',
     ShowTypeBeenRepost = 'ShowTypeBeenRepost',
 }
-const WeiboDetail = ({ route }) => {
-    const { wb, uid }:{weibo:Weibo, uid:string} = route.params;  // 从导航中获取传递的微博数据
+const WeiboDetail = () => {
+    const params = useLocalSearchParams();
+    const wb = params.wb ? JSON.parse(params.wb as string) : null;
+    const uid = params.uid as string || '0';
+    
     const [weibo, setWeibo] = useState<Weibo>(wb);
     const [showType, setShowType] = useState<ShowTypes>(ShowTypes.ShowTypeComment);
     const [newComment, setNewComment] = useState<string>('');
@@ -47,7 +50,6 @@ const WeiboDetail = ({ route }) => {
     const [selection, setSelection] = useState({start: 0, end: 0});
     const [showEmojiPanel, setShowEmojiPanel] = useState<boolean>(false);
 
-    const navigation = useNavigation();
     const {setting} = useSetting();
     const {showToast} = useToast();
     const {showLoading, hideLoading} = useLoading();
@@ -58,7 +60,7 @@ const WeiboDetail = ({ route }) => {
 
     useEffect(()=>{
         const init = async ()=>{
-            if(weibo.type === 3){
+            if(!wb || weibo.type === 3){
                 return;
             }
             const [getWeiboResult, updatedWeibo, getWeiboErr] = await weiboService.getWeibo(weibo.id);
@@ -87,13 +89,14 @@ const WeiboDetail = ({ route }) => {
             setBeenReposts(weiboBeenReposted);
 
         };
-        const { wb } = route.params;
-        setWeibo(wb);
-        init();
-    }, [route.params]);
+        if(wb) {
+            setWeibo(wb);
+            init();
+        }
+    }, [wb]);
 
     const onDelete = () => {
-        navigation.navigate('Index' as any);
+        router.push('/weibo');
     };
 
     // 发布评论
@@ -218,7 +221,7 @@ const WeiboDetail = ({ route }) => {
                         <View style={styles.commentTopRow}>
                             <View style={styles.commentLeftRow}>
                                 <Text style={styles.commentUsername} numberOfLines={1} ellipsizeMode="tail">{item.author.name}</Text>
-                                {item.tsr === 1 && (<Text style={styles.commentTsrIcon} onPress={() => {navigation.navigate('TSRVerify' as any, {type: 'comment', comment: item} as any,);}}>{item.tsrVerified === 1 ? '✅' : '❌'}</Text>)}
+                                {item.tsr === 1 && (<Text style={styles.commentTsrIcon} onPress={() => {router.push({ pathname: '/weibo/TSRVerify', params: { type: 'comment', comment: JSON.stringify(item) } })}}>{item.tsrVerified === 1 ? '✅' : '❌'}</Text>)}
                             </View>
                             <Text style={styles.commentTime} numberOfLines={1}>{item.createdAt.replaceAll('+08:00', '')}</Text>
                         </View>

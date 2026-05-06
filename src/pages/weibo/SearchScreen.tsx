@@ -9,14 +9,14 @@ import {
     Alert,
     TouchableOpacity,
 } from 'react-native';
-import { Weibo } from '../../services/weibo/model';
+import { Weibo } from '../../service/weibo/model';
 import { WeiboItem } from './components/WeiboItem';
-import WeiboService from '../../services/weibo';
+import WeiboService from '../../service/weibo';
 import { format, set } from 'date-fns';
 import DatePickerPanel from '../../components/datePickerPanel';
 import {Picker} from '@react-native-picker/picker';
 import {useSetting} from '../../provider/setting';
-import {getEnabledUsers} from '../../services/weibo/data';
+import {getEnabledUsers} from '../../service/weibo/data';
 
 const limit = 10;
 

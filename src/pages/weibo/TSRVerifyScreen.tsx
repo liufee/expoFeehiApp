@@ -1,16 +1,20 @@
 import React from 'react';
-import {Comment, Weibo} from '../../services/weibo/model';
-import WeiboService from '../../services/weibo';
-import TsrVerify from '../../components/tsrVerify';
+import {Comment, Weibo} from '../../service/weibo/model';
+import WeiboService from '../../service/weibo';
+import TsrVerify from '../../util/tsr';
+import { useLocalSearchParams } from 'expo-router';
 
-const TSRVerifyScreen = ({ route }: any) => {
-    const { type, weibo, comment }:{type:string, weibo:Weibo, comment:Comment} = route.params;
+const TSRVerifyScreen = () => {
+    const params = useLocalSearchParams();
+    const type = params.type as string;
+    const weibo = params.weibo ? JSON.parse(params.weibo as string) : null;
+    const comment = params.comment ? JSON.parse(params.comment as string) : null;
 
     const weiboService = WeiboService.getInstance();
 
     const formula = type === 'feed' ? 'time+content+base64_medias' : 'time+content+base64_medias';
-    const createdAt = type === 'feed' ? weibo.createdAt : comment.createdAt;
-    const id = type === 'feed' ? weibo.id : comment.id;
+    const createdAt = type === 'feed' ? weibo?.createdAt : comment?.createdAt;
+    const id = type === 'feed' ? weibo?.id : comment?.id;
 
     return <TsrVerify formula={formula} createdAt={createdAt}
                 getFullOriginalString={

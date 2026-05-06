@@ -12,12 +12,12 @@ import {
     Linking,
     NativeModules,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 import {formatWeiboContent} from './util';
 import {useSetting} from '../../provider/setting';
 import config from '../../config';
-import WeiboService from '../../services/weibo';
-import {mediaUsers} from '../../services/weibo/news';
+import WeiboService from '../../service/weibo';
+import {mediaUsers} from '../../service/weibo/news';
 
 // 定义数据类型
 interface NewsItem {
@@ -91,7 +91,6 @@ const HotSearchScreen: React.FC = () => {
     });
 
     const {setting} = useSetting();
-    const navigation = useNavigation();
     const weiboService = WeiboService.getInstance();
 
     // 通用请求函数
@@ -514,12 +513,10 @@ const HotSearchScreen: React.FC = () => {
             Alert.alert('失败', getWeiboErr);
             return;
         }
-        navigation.navigate('index' as any, {
-            screen: 'WeiboDetail',
-            params: {
-                wb: weibo, uid: '0',
-            },
-        } as any);
+        router.push({
+            pathname: '/weibo/detail',
+            params: { wb: JSON.stringify(weibo), uid: '0' }
+        });
     };
 
     const openNewsDetail = async (source:string, item:NewsItem) => {
@@ -531,10 +528,10 @@ const HotSearchScreen: React.FC = () => {
         }else if(source  === 'rfi') {
             uid = 111;
         }
-        navigation.navigate('index' as any, {
-            screen: 'WeiboDetail',
+        router.push({
+            pathname: '/weibo/detail',
             params: {
-                wb:{
+                wb: JSON.stringify({
                     id: item.link,
                     type: 3,
                     text: item.title,
@@ -550,9 +547,10 @@ const HotSearchScreen: React.FC = () => {
                     location: '',
                     by: { id: 0, title: '', url: '' },
                     tsr: 0,
-                }, uid: '0',
-            },
-        } as any);
+                }),
+                uid: '0'
+            }
+        });
     };
 
     // 打开链接
