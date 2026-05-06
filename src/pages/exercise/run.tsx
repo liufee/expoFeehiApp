@@ -418,6 +418,7 @@ export default function RunScreen() {
                     longitude: path[0].longitude,
                   }}
                   title="起点"
+                  pinColor="#4CAF50"
                 />
               )}
               {!running && path.length > 0 && (
@@ -427,6 +428,7 @@ export default function RunScreen() {
                     longitude: path[path.length - 1].longitude,
                   }}
                   title="终点"
+                  pinColor="#ff5722"
                 />
               )}
             </>
