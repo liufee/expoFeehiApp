@@ -11,7 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {WeiboItem} from './components/WeiboItem';
 import WeiboService, {NewsService} from '../../service/weibo';
-import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
+import EventEmitter from 'react-native/Libraries/EventEmitter';
 import {getEnabledUsers} from '../../service/weibo/data';
 import {AppWeiboBasePath} from '../../../constants';
 import Composer from './components/Composer';
