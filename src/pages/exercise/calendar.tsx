@@ -5,6 +5,7 @@ import {format, parse} from 'date-fns';
 import {useNavigation} from '@react-navigation/native';
 import {Record as RecordModel, RecordType} from '../../service/exercise/model';
 import {exerciseService} from '../../service/exercise/exercise';
+import {IconSymbol} from "@/components/ui/icon-symbol";
 
 interface RecordsByDate{
   date:string,
@@ -120,9 +121,15 @@ const calendar = ({records}:{records:RecordsByDate[]}) => {
                             onLongPress={()=>handleDelete(exercise)}
                         >
                           <View style={{...styles.iconContainer}}>
-                            {exercise.type === RecordType.RecordTypeAbdominal && <Text><Image source={require('../../../assets/images/abdominal.png')} width={40} height={40} /></Text>}
-                            {exercise.type === RecordType.RecordTypeRun && <Text><Image source={require('../../../assets/images/run_tracker.png')} width={40} height={40} /></Text>}
-                            {exercise.type === RecordType.RecordTypeSitUpPushUp && <Text style={{position:'relative', top:-12}}><Image source={require('../../../assets/images/sit-up.png')} width={40} height={40} /></Text>}
+                            {exercise.type === RecordType.RecordTypeAbdominal && (
+                                <IconSymbol name="figure.core.training" size={28} color="#4CAF50" />
+                            )}
+                            {exercise.type === RecordType.RecordTypeRun && (
+                                <IconSymbol name="figure.run" size={28} color="#2196F3" />
+                            )}
+                            {exercise.type === RecordType.RecordTypeSitUpPushUp && (
+                                <IconSymbol name="figure.strengthtraining.traditional" size={28} color="#FF9800" />
+                            )}
                           </View>
                           <View style={styles.detailsContainer}>
                             {exercise.type === RecordType.RecordTypeAbdominal &&
