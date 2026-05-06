@@ -17,6 +17,7 @@ import WeiboService from '../../../service/weibo';
 import {Media as MediaModel, MediaType} from '../../../service/weibo/model';
 import {getMediaType} from '../../../util';
 import {useToast} from "@/src/provider";
+import {fileViewer} from "@/src/components/fileViewer";
 
 const { width, height } = Dimensions.get('window');
 
@@ -186,14 +187,6 @@ export const Media: React.FC<WeiboMediaProps> = ({ media, weiboId }) => {
         Alert.alert('保存成功', `文件已保存到：${info}`);
     };
 
-    const openFile = (path: string) => {
-        if (path.startsWith('http')) {
-            Linking.openURL(path);
-        } else {
-
-        }
-    };
-
     if (!media || media.length === 0) return null;
 
     return (
@@ -217,13 +210,13 @@ export const Media: React.FC<WeiboMediaProps> = ({ media, weiboId }) => {
                     return (
                         <TouchableOpacity
                             key={key}
-                            onPress={() => {
+                            onPress={async () => {
                                 if (isImage) {
                                     handleMediaClick(index);
                                 } else if (isVideo) {
                                     toggleVideoPlayback(key);
                                 } else if (isFile) {
-                                    openFile(mediaItem.Origin);
+                                    await fileViewer(mediaItem.Origin);
                                 }
                             }}
                             onLongPress={() => handleMediaClick(index)}
@@ -248,7 +241,7 @@ export const Media: React.FC<WeiboMediaProps> = ({ media, weiboId }) => {
                             )}
 
                             {isFile && (
-                                <Pressable onPress={() => openFile(mediaItem.Origin)}>
+                                <Pressable onPress={async () => await fileViewer(mediaItem.Origin)}>
                                     <View style={[styles.mediaItem, styles.filePreviewBox]}>
                                         <Text style={{ fontSize: 12 }}>{mediaItem.Mime?.split('/')[1]?.toLowerCase() || mediaItem.Mime} </Text>
                                         <Text style={styles.fileTypeText}>{mediaItem.Origin?.split('.')[1]?.toUpperCase() || 'FILE'} </Text>
@@ -329,7 +322,7 @@ export const Media: React.FC<WeiboMediaProps> = ({ media, weiboId }) => {
                                             />
                                         ) : (
                                             <Pressable
-                                                onPress={() => openFile(item.Origin)}
+                                                onPress={async() => await fileViewer(item.Origin)}
                                                 style={styles.fullFilePreview}
                                             >
                                                 <Text style={{ fontSize: 18, color: 'white', textAlign: 'center' }}>{item.Mime?.split('/')[1]?.toLowerCase() || item.Mime} </Text>
@@ -361,9 +354,9 @@ export const Media: React.FC<WeiboMediaProps> = ({ media, weiboId }) => {
 
                             <TouchableOpacity
                                 style={styles.modalBtn}
-                                onPress={() =>
+                                onPress={async() =>
                                     media[currentVisibleIndex] &&
-                                    openFile(media[currentVisibleIndex].Origin)
+                                    fileViewer(media[currentVisibleIndex].Origin)
                                 }
                             >
                                 <Text style={styles.modalBtnText}>源文件</Text>
