@@ -689,7 +689,6 @@ export default class WeiboService{
             sourceFile.copy(destFile);
             return [true, filePath + '/' + fileName, isLarge];
         } catch (e) {
-            console.log(e)
             return [false, userErrorMessage(e), false];
         }
     }

@@ -43,7 +43,7 @@ export function mediaPicker() {
             }
 
             const normalized: Asset[] = result.assets.map((file) => ({
-                uri: getABSPath(file.uri),
+                uri: file.uri,
                 fileName: file.name ?? '',
                 type: file.mimeType ?? 'unknown',
                 fileSize: file.size ?? 0,
