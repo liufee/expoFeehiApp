@@ -451,7 +451,7 @@ export default function RunScreen() {
       <View style={styles.infoPanel} {...panResponder.panHandlers}>
         <Text style={styles.infoText}>
           <Text style={styles.infoValue}>{runDuration}</Text>
-          {' '}
+          {'      '}
           <Text style={styles.infoValue}>{distance.toFixed(2)} km</Text>
         </Text>
         <Text style={styles.infoText}>
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
   },
   infoPanel: {
     position: 'absolute',
-    top: 50,
+    top: 55,//50
     left: 20,
     right: 20,
     backgroundColor: 'rgba(0,0,0,0.5)',
