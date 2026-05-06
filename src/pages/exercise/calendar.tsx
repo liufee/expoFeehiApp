@@ -1,6 +1,7 @@
 import {Alert, Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import React, {useState} from 'react';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {format, parse} from 'date-fns';
 import {useNavigation} from '@react-navigation/native';
 import {Record as RecordModel, RecordType} from '../../service/exercise/model';
@@ -13,6 +14,7 @@ interface RecordsByDate{
 }
 
 const calendar = ({records}:{records:RecordsByDate[]}) => {
+  const insets = useSafeAreaInsets();
   const [selectedDate, setSelectedDate] = useState<RecordsByDate|null>(null);
   const navigation = useNavigation();
 
@@ -78,7 +80,7 @@ const calendar = ({records}:{records:RecordsByDate[]}) => {
     ]);
   };
   return(
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
         <View style={styles.content}>
           <View style={ {flexDirection: 'row', alignItems: 'center'}}>
             <View style={{backgroundColor: '#4CAF50',width: 20,height: 20,justifyContent: 'center',alignItems: 'center',borderRadius: 3}}></View>

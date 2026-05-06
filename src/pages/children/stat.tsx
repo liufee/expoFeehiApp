@@ -11,6 +11,7 @@ import {
     View,
     Alert, TextInput,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BabyEventItem from './components/BabyEventItem';
 import EventStatCard from './components/EventStatCard';
 import {format} from 'date-fns';
@@ -105,6 +106,7 @@ function DateInput({ label, value, onChange }: {label: string, value: Date, onCh
 
 // ========== 主页面 ==========
 export default function Stat() {
+    const insets = useSafeAreaInsets();
     const [events, setEvents] = useState<any[]>([]);
     const [selectedChild, setSelectedChild] = useState('son');
     const [filterType, setFilterType] = useState('yesterday');
@@ -236,7 +238,7 @@ export default function Stat() {
     });
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
             {/* 孩子选择 */}
             <View style={styles.filterSection}>
                 <View style={styles.filterRow}>
@@ -338,7 +340,7 @@ export default function Stat() {
 
 // ========== 样式（移除 LogItem 相关样式）==========
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F8F9FA', paddingTop: 20 }, // 为全局 SafeArea 添加额外的顶部间距
+    container: { flex: 1, backgroundColor: '#F8F9FA' },
 
     // 筛选区域
     filterSection: {

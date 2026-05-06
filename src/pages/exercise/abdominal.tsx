@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { format, parse, addMinutes } from 'date-fns';
 import { exerciseService } from '@/src/service/exercise/exercise';
@@ -29,6 +30,7 @@ const actions = [
 ];
 
 export default function AbdominalScreen() {
+    const insets = useSafeAreaInsets();
     const [paused, setPaused] = useState(true);
     const [muted, setMuted] = useState(false);
     const [showSkipRest, setShowSkipRest] = useState(false);
@@ -431,7 +433,7 @@ export default function AbdominalScreen() {
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]} contentContainerStyle={styles.scrollContent}>
             {/* 加载状态 */}
             {loading && (
                 <View style={styles.loadingOverlay}>

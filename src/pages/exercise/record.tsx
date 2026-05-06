@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { format, parse } from 'date-fns';
 import Calendar from './calendar';
 import { exerciseService } from '@/src/service/exercise/exercise';
@@ -16,6 +17,7 @@ import { DailyExercise, Record as RecordModel, RecordType } from '@/src/service/
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function RecordScreen() {
+  const insets = useSafeAreaInsets();
   const [isMenuVisible, setMenuVisible] = useState(false);
   const [menuAnimation] = useState(new Animated.Value(-250));
   const [opacityAnimation] = useState(new Animated.Value(0));
@@ -116,7 +118,7 @@ export default function RecordScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
       {!isMenuVisible && (
         <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
           <Text style={styles.menuButtonText}>☰</Text>

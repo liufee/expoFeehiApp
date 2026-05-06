@@ -11,6 +11,7 @@ import {
   PanResponder,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // 条件导入 react-native-maps，仅在非 Web 平台
 let MapView: any;
 let Polyline: any;
@@ -32,6 +33,7 @@ import { formatTime, haversineDistance, formatTimestamp, calculateSegments, calc
 const PROGRESS_KEY_LAST_HAND_INPUT_START_TIME = 'last_hand_input_run_start_time';
 
 export default function RunScreen() {
+  const insets = useSafeAreaInsets();
   const [running, setRunning] = useState(false);
   const [path, setPath] = useState<Path[]>([]);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -386,7 +388,7 @@ export default function RunScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
       {/* 地图视图 - 仅在原生平台显示 */}
       {Platform.OS !== 'web' ? (
         <MapView

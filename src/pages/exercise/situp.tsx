@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, Text, TextInput, View, StyleSheet, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { addMinutes, format, isValid, parse } from 'date-fns';
 import { exerciseService } from '@/src/service/exercise/exercise';
 import { Record, RecordType, Status } from '@/src/service/exercise/model';
 
 export default function SitupScreen() {
+  const insets = useSafeAreaInsets();
   const now = new Date();
   const initEnd = addMinutes(now, 90);
   const [startTime, setStartTime] = useState(format(now, 'yyyy-MM-dd HH:mm:ss'));
@@ -114,7 +116,7 @@ export default function SitupScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
       <Text style={styles.title}>
         {existingRecordId ? '修改今日记录' : '录入力量记录'}
       </Text>

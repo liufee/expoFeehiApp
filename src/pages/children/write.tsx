@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BabyEventItem from './components/BabyEventItem';
 import {format} from 'date-fns';
 import { childrenService } from '@/src/service/children/children';
@@ -121,6 +122,7 @@ function LabeledInput({ label, value, onChange, placeholder, keyboardType='defau
 }
 
 export default function Write(){
+    const insets = useSafeAreaInsets();
     const [child,setChild] = useState('son');
     const [eventType,setEventType] = useState(EventType.Eat);
     const [events,setEvents] = useState<any[]>([]);
@@ -241,7 +243,7 @@ export default function Write(){
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
             <View style={styles.formContainer}>
                 <LabeledOption label="👶 孩子" options={childrenList} selected={child} onSelect={setChild}/>
                 <LabeledOption label="📝 类型" options={newBornEvents} selected={eventType} onSelect={(value) => setEventType(value as EventType)}/>
@@ -286,7 +288,7 @@ export default function Write(){
 }
 
 const styles = StyleSheet.create({
-    container: {  flex: 1, backgroundColor: '#F8F9FA', paddingTop: 20 }, // 为全局 SafeArea 添加额外的顶部间距
+    container: {  flex: 1, backgroundColor: '#F8F9FA' },
     formContainer: {padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#F0F0F0'},
     row: { flexDirection:'row', alignItems:'center', marginVertical:6 },
     label: { width:90, fontSize:14, color:'#555' },
