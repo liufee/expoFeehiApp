@@ -3,7 +3,6 @@ import {AppDBBasePath} from "@/constants";
 
 export class ExerciseDatabase {
   private db: SQLite.SQLiteDatabase | null = null;
-  private dbSuffix: string = '';
 
   async init() {
     try {

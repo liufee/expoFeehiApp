@@ -1,14 +1,9 @@
 import * as SQLite from 'expo-sqlite';
 import {Alert} from 'react-native';
 import {AppDBBasePath} from '@/constants';
-import {ExerciseDatabase} from "@/src/db/exercise";
-
-const directoryPath = `${AppDBBasePath}/weibo`;
 
 class Weibo{
     private db: SQLite.SQLiteDatabase | null = null;
-
-    private dbSuffix: string = '';
 
     public constructor() {
     }
@@ -29,7 +24,7 @@ class Weibo{
             return;
         }
         await this.db.closeAsync();
-        await this.init(this.dbSuffix);
+        await this.init();
     }
 
     private async enableWal(){
@@ -178,10 +173,12 @@ class Weibo{
             );
         }
 
-        await this.db.runAsync(
-            'INSERT INTO tsr (type, third_id, tsr) VALUES (?, ?, ?)',
-            ['feed', record.id, record.tsr]
-        );
+        if (record.tsr !== '') {
+            await this.db.runAsync(
+                'INSERT INTO tsr (type, third_id, tsr) VALUES (?, ?, ?)',
+                ['feed', record.id, record.tsr]
+            );
+        }
 
         return true;
     }
@@ -319,7 +316,7 @@ class Weibo{
 
         await this.db.runAsync(
             `INSERT INTO comments(id, time, like_num, content, location, reply_to, feed_id, user_id, tsr) VALUES(?,?,?,?,?,?,?,?, ?)`,
-            [record.id,  record.time, record.like_num, record.content, record.location, record.reply_to, record.feed_id, record.user_id, record === '' ? 0 : 1]
+            [record.id,  record.time, record.like_num, record.content, record.location, record.reply_to, record.feed_id, record.user_id, record.tsr === '' ? 0 : 1]
         );
 
         for (let i in record.medias) {
@@ -330,10 +327,12 @@ class Weibo{
             );
         }
 
-        await this.db.runAsync(
-            'INSERT INTO tsr (type, third_id, tsr) VALUES (?, ?, ?)',
-            ['comment', record.id, record.tsr]
-        );
+        if (record.tsr !== '') {
+            await this.db.runAsync(
+                'INSERT INTO tsr (type, third_id, tsr) VALUES (?, ?, ?)',
+                ['comment', record.id, record.tsr]
+            );
+        }
 
         return true;
     }
