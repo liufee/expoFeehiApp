@@ -31,10 +31,10 @@ const WeiboIndex = ({}) => {
     const [page, setPage] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [topIsLoading, setTopIsLoading] = useState(false);
-    const [uid, setUid] = useState<string>("1570737487"); // 当前选择的用户名
+    const [uid, setUid] = useState<string>(setting.weibo.defaultUser); // 当前选择的用户名
     const weiboListRef = useRef<FlatList<any>|null>(null);
 
-    const enabledUsers = getEnabledUsers(["1570737487"], []);
+    const enabledUsers = getEnabledUsers(setting.weibo.enabledUsers, setting.weibo.anonymous);
 
     const weiboService = WeiboService.getInstance();
     const newsService = NewsService.getInstance();
