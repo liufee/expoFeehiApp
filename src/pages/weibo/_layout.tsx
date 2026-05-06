@@ -44,6 +44,15 @@ export default function ExerciseLayout() {
         }}
       />
       <Tabs.Screen
+        name="search"
+        options={{
+          title: '搜索',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="figure.core.training" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="detail"
         options={{
           title: '详情',
