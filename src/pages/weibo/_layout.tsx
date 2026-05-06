@@ -39,7 +39,7 @@ export default function ExerciseLayout() {
         options={{
           title: '微博',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="figure.core.training" color={color} />
+            <IconSymbol size={28} name="sina.weibo" color={color} />
           ),
         }}
       />
@@ -48,7 +48,7 @@ export default function ExerciseLayout() {
         options={{
           title: '搜索',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="figure.core.training" color={color} />
+            <IconSymbol size={28} name="search" color={color} />
           ),
         }}
       />

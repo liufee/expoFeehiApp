@@ -28,6 +28,10 @@ const MAPPING = {
   'pacifier': 'baby-changing-station',
   'stroller': 'child-friendly',
   'person.pregnant': 'pregnant-woman',
+  'sina.weibo': 'share',
+  'search': 'search',
+  'gear': 'settings',
+  'gearshape.fill': 'settings',
 } as IconMapping;
 
 /**

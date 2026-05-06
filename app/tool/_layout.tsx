@@ -47,6 +47,16 @@ export default function TabLayout() {
             }}
         />
         <Tabs.Screen
+            name="setting/index"
+            options={{
+                title: '设置',
+                href: "/tool/setting",
+                tabBarIcon: ({ color }) => (
+                    <IconSymbol size={28} name="gearshape.fill" color={color} />
+                ),
+            }}
+        />
+        <Tabs.Screen
             name="pregnancy/calculate"
             options={{
                 href: null,

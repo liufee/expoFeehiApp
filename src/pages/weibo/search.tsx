@@ -9,6 +9,7 @@ import {
     Alert,
     TouchableOpacity,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Weibo } from '../../service/weibo/model';
 import { WeiboItem } from './components/WeiboItem';
 import WeiboService from '../../service/weibo';
@@ -21,6 +22,7 @@ import {getEnabledUsers} from '../../service/weibo/data';
 const limit = 10;
 
 const WeiboSearch = ({}) => {
+    const insets = useSafeAreaInsets();
     const {setting} = useSetting();
     const [keyword, setKeyword] = useState<string>('');
     const [weibos, setWeibos] = useState<Weibo[]>([]);
@@ -114,7 +116,7 @@ const WeiboSearch = ({}) => {
     const initialDisplayDate = (isSettingStartDate ? startDate : endDate) || set(new Date(), { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             <View style={styles.searchContainer}>
                 <Picker
                     selectedValue={uid as any}

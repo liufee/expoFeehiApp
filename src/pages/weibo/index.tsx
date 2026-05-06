@@ -8,6 +8,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {WeiboItem} from './components/WeiboItem';
 import WeiboService, {NewsService} from '../../service/weibo';
 import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
@@ -23,6 +24,7 @@ const draftFile = AppWeiboBasePath + '/draft';
 const limit = 10;
 
 const WeiboIndex = ({}) => {
+    const insets = useSafeAreaInsets();
 
     const [weibos, setWeibos] = useState<Weibo[]>([]); // 微博列表
     const [page, setPage] = useState(1);
@@ -110,7 +112,7 @@ const WeiboIndex = ({}) => {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
+            <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
                 {/* 账号切换 */}
                 <View style={styles.usernameContainer}>
                     <Picker
