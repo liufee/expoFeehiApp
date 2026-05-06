@@ -10,9 +10,8 @@ import {
     Pressable,
     Linking,
 } from 'react-native';
-import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import {File} from "expo-file-system/src";
+import { fileViewer } from '@/src/components/fileViewer';
 import {APPRuntimePath} from "@/constants";
 
 type EventLink = { text: string; url: string };
@@ -302,21 +301,8 @@ export default function PregnancyCalendarAutoScroll({
                                             // HTTP/HTTPS 链接直接打开
                                             await Linking.openURL(l.url);
                                         } else {
-                                            // 本地文件链接，先检查文件是否存在
-                                            l.url = l.url.replace('/storage/emulated/0/feehi/runtime', APPRuntimePath);
-                                            const fileInfo = new File(l.url);
-                                            if (fileInfo.exists) {
-                                                // 尝试使用 expo-sharing 打开文件
-                                                const canShare = await Sharing.isAvailableAsync();
-                                                if (canShare) {
-                                                    await Sharing.shareAsync(l.url);
-                                                } else {
-                                                    // 如果不支持分享，尝试直接用 Linking 打开
-                                                    await Linking.openURL(l.url);
-                                                }
-                                            } else {
-                                                console.warn('File not found:', l.url);
-                                            }
+                                            const filePath = l.url.replace('/storage/emulated/0/feehi/runtime', APPRuntimePath);
+                                            await fileViewer(filePath);
                                         }
                                     } catch (error) {
                                         console.error('Error opening file:', error);
