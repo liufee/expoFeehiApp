@@ -1,10 +1,10 @@
 import React from 'react';
 import {Comment, Weibo} from '../../service/weibo/model';
 import WeiboService from '../../service/weibo';
-import TsrVerify from '../../util/tsr';
+import TsrVerify from '../../components/tsrVerify';
 import { useLocalSearchParams } from 'expo-router';
 
-const TSRVerifyScreen = () => {
+const TSRVerify = () => {
     const params = useLocalSearchParams();
     const type = params.type as string;
     const weibo = params.weibo ? JSON.parse(params.weibo as string) : null;
@@ -41,4 +41,4 @@ const TSRVerifyScreen = () => {
     ></TsrVerify>;
 };
 
-export default TSRVerifyScreen;
+export default TSRVerify;

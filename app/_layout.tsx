@@ -27,7 +27,7 @@ export default function RootLayout() {
                 <Stack.Screen name="exercise" options={{ headerShown: false }} />
                 <Stack.Screen name="children" options={{ headerShown: false }} />
                 <Stack.Screen name="tool" options={{ headerShown: false }} />
-                <Stack.Screen name="weibo" options={{ headerShown: true }} />
+                <Stack.Screen name="weibo" options={{ headerShown: false }} />
               </Stack>
               <StatusBar style="auto" />
             </LoadingProvider>

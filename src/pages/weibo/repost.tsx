@@ -6,9 +6,9 @@ import Composer from './components/Composer';
 import {useSetting} from '../../provider/setting';
 import {AppWeiboBasePath} from '../../../constants';
 
-export default function RepostScreen() {
+export default function Repost() {
     const params = useLocalSearchParams();
-    
+
     const uid = params.uid as string || '0';
     const repostWeibo = params.repostWeibo ? JSON.parse(params.repostWeibo as string) : null;
 

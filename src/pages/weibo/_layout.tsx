@@ -59,6 +59,20 @@ export default function ExerciseLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="repost"
+        options={{
+          title: '转发',
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="TSRVerify"
+        options={{
+          title: 'tsrVerify',
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

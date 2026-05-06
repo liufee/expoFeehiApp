@@ -1,7 +1,6 @@
 import {Comment, Weibo, Media, By, User, Like, TSR, BeenPosted, Location} from './model';
 import {format} from 'date-fns';
 import { File, Directory, Paths } from 'expo-file-system';
-import {NativeModules} from 'react-native';
 import {
     AppPicturesBasePath,
     AppWeiboBasePath,
@@ -18,7 +17,7 @@ import {
 import {userErrorMessage} from '../../util';
 import {weiboDB} from "@/src/db/weibo";
 import defaultSetting from "@/src/service/setting/defaultSetting";
-import {generateTSR} from "@/src/util/tsr";
+import {assembleStrToCreateTSR, generateTSR} from "@/src/util/tsr";
 
 export default class WeiboService{
     private dbInitialized = false;
@@ -386,13 +385,11 @@ export default class WeiboService{
                     filesStr += comment.media[i].Origin + ',';
                 }
                 if(filesStr.length > 0){
-                    filesStr = filesStr.slice(0, -1);
+                    filesStr = filesStr.slice(0, -1);x
                 }
-                const originString = await NativeModules.RNHelper.assembleStrToCreateTSR(`${obj.createdAt}+${obj.text}+`, filesStr);
-                if(originString.indexOf('error:') === 0){
-                    return [false, originString];
-                }
-                return [true, originString];
+                //const originString = await NativeModules.RNHelper.assembleStrToCreateTSR(`${obj.createdAt}+${obj.text}+`, filesStr);
+                const [success, originString] = await assembleStrToCreateTSR(`${obj.createdAt}+${obj.text}+`, filesStr);
+                return [success, originString];
             }
         }
         const weibo = obj as Weibo;
@@ -419,17 +416,14 @@ export default class WeiboService{
             for(let i in weibo.media){
                 const item = weibo.media[i];
                 const file = new File(item.Origin);
-                const base64Content = await file.readAsync({ encoding: 'base64' });
+                const base64Content = await file.base64();
                 mediaContents += base64Content;
             }
             return [true, `${createdAt}+${weibo.text}+${mediaContents}`];
         }
         //const originString = await NativeModules.RNHelper.assembleStrToCreateTSR(`${createdAt}+${weibo.text}+`, filesStr);
-        const originString = `${createdAt}+${weibo.text}+` + filesStr
-        if(originString.indexOf('error:') === 0){
-            return [false, originString];
-        }
-        return [true, originString];
+        const [success, originString] = await assembleStrToCreateTSR(`${createdAt}+${weibo.text}+`, filesStr);
+        return [success, originString];
     }
 
     public async saveMediaToLocal(mediaPath: string):Promise<[boolean, string]>{

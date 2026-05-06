@@ -10,8 +10,8 @@ import HotSearchScreen from './HotSearchScreen';
 import WeiboIndex,{tabPressEmitter} from './IndexScreen';
 import WeiboDetail from './DetailScreen';
 import WeiboSearch from './SearchScreen';
-import TSRVerifyScreen from './TSRVerifyScreen';
-import RepostScreen from './RepostScreen';
+import TSRVerify from './TSRVerify';
+import Repost from './repost';
 
 const Tab = createBottomTabNavigator();
 
@@ -105,8 +105,8 @@ const WeiboIndexStack = ()=> {
         <Stack.Navigator>
             <Stack.Screen options={{ headerShown:false}} name="Index" component={WeiboIndex}/>
             <Stack.Screen options={{ headerShown:false}} name="WeiboDetail" component={WeiboDetail}/>
-            <Stack.Screen options={{ headerShown:false}} name="Repost" component={RepostScreen}/>
-            <Stack.Screen options={{ headerShown:false}} name="TSRVerify" component={TSRVerifyScreen}/>
+            <Stack.Screen options={{ headerShown:false}} name="Repost" component={Repost}/>
+            <Stack.Screen options={{ headerShown:false}} name="TSRVerify" component={TSRVerify}/>
         </Stack.Navigator>
     );
 };
@@ -116,8 +116,8 @@ const WeiboSearchStack = ()=> {
         <Stack.Navigator>
             <Stack.Screen options={{ headerShown:false}} name="Search" component={WeiboSearch}/>
             <Stack.Screen options={{ headerShown:false}} name="WeiboDetail" component={WeiboDetail}/>
-            <Stack.Screen options={{ headerShown:false}} name="Repost" component={RepostScreen}/>
-            <Stack.Screen options={{ headerShown:false}} name="TSRVerify" component={TSRVerifyScreen}/>
+            <Stack.Screen options={{ headerShown:false}} name="Repost" component={Repost}/>
+            <Stack.Screen options={{ headerShown:false}} name="TSRVerify" component={TSRVerify}/>
         </Stack.Navigator>
     );
 };
