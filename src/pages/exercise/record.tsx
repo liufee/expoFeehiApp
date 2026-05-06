@@ -39,7 +39,7 @@ export default function RecordScreen() {
         [RecordType.RecordTypeAbdominal, RecordType.RecordTypeRun, RecordType.RecordTypeSitUpPushUp],
         showRecordStart,
         showRecordEnd,
-        'asc'
+        'desc'
       );
       if (!success) {
         Alert.alert('失败', error);
