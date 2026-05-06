@@ -8,7 +8,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "dev": "./node_modules/.bin/expo start",
+    "p": "EAS_SKIP_AUTO_FINGERPRINT=1 ./node_modules/.bin/eas update --branch master --message \"fix\" --non-interactive"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
