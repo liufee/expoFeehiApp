@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
-  Animated,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { format, parse } from 'date-fns';
@@ -18,9 +18,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function RecordScreen() {
   const insets = useSafeAreaInsets();
-  const [isMenuVisible, setMenuVisible] = useState(false);
-  const [menuAnimation] = useState(new Animated.Value(-250));
-  const [opacityAnimation] = useState(new Animated.Value(0));
+  const [menuVisible, setMenuVisible] = useState(false);
   const [records, setRecords] = useState<DailyExercise[]>([]);
   const [showType, setShowType] = useState('list');
 
@@ -91,59 +89,44 @@ export default function RecordScreen() {
       : 'normal';
   };
 
-  const toggleMenu = () => {
-    const toValue = isMenuVisible ? -250 : 0;
-    const opacityValue = isMenuVisible ? 0 : 0.5;
+  const displayModes = [
+    { label: '列表模式', value: 'list' },
+    { label: '日历模式', value: 'calendar' }
+  ];
 
-    setMenuVisible(!isMenuVisible);
-    Animated.spring(menuAnimation, {
-      toValue,
-      useNativeDriver: true,
-    }).start();
-
-    Animated.timing(opacityAnimation, {
-      toValue: opacityValue,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const closeMenu = () => {
-    toggleMenu();
-  };
-
-  const changeDisplayType = (type: string) => {
-    setShowType(type);
-    toggleMenu();
+  const handleDisplayModeSelect = (mode: string) => {
+    setMenuVisible(false);
+    setShowType(mode);
   };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
-      {!isMenuVisible && (
-        <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
-          <Text style={styles.menuButtonText}>☰</Text>
+      {/* 悬浮球显示模式选择 */}
+      <View style={{position: 'absolute', top: insets.top + 33, left: 0, zIndex: 100, padding: 0}}>
+        <TouchableOpacity
+          style={styles.floatingBall}
+          onPress={() => setMenuVisible(true)}
+        >
+          <Text style={styles.floatingBallText}>S</Text>
         </TouchableOpacity>
-      )}
+      </View>
 
-      {isMenuVisible && (
-        <TouchableWithoutFeedback onPress={closeMenu}>
-          <Animated.View style={[styles.overlay, { opacity: opacityAnimation }]} />
-        </TouchableWithoutFeedback>
-      )}
-
-      <Animated.View
-        style={[styles.sideMenu, { transform: [{ translateX: menuAnimation } as const] }]}>
-        <TouchableOpacity onPress={() => changeDisplayType('list')}>
-          <View style={styles.menuItem}>
-            <Text style={styles.menuItemText}>列表模式</Text>
+      <Modal
+        transparent
+        animationType="fade"
+        visible={menuVisible}
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setMenuVisible(false)}>
+          <View style={styles.menuModal}>
+            {displayModes.map(mode => (
+              <TouchableOpacity key={mode.value} style={styles.menuItem} onPress={() => handleDisplayModeSelect(mode.value)}>
+                <Text style={styles.menuItemText}>{mode.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => changeDisplayType('calendar')}>
-          <View style={styles.menuItem}>
-            <Text style={styles.menuItemText}>日历模式</Text>
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
+        </Pressable>
+      </Modal>
 
       {showType === 'list' && (
         <ScrollView style={styles.contentArea}>
@@ -258,58 +241,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F8',
     position: 'relative',
   },
-  menuButton: {
-    position: 'absolute',
-    top: 3,
-    left: 3,
-    zIndex: 999,
-    backgroundColor: 'gray',
-    padding: 8,
-    borderRadius: 50,
-  },
-  menuButtonText: {
-    fontSize: 15,
-    color: '#fff',
-  },
-  sideMenu: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    width: 200,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingTop: 60,
-    borderRightWidth: 1,
-    borderColor: '#E0E0E0',
-    shadowColor: '#000',
-    shadowOffset: { width: -3, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 3,
-    zIndex: 9999,
-    marginTop: 50,
-    marginLeft: 10,
-    borderTopLeftRadius: 15,
-    borderBottomLeftRadius: 15,
-  },
-  menuItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderColor: '#E0E0E0',
-  },
-  menuItemText: {
-    fontSize: 18,
-    color: '#fff',
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    zIndex: 9998,
-  },
   contentArea: {
     marginLeft: 0,
     flex: 1,
@@ -386,4 +317,40 @@ const styles = StyleSheet.create({
     color: '#555',
     lineHeight: 18,
   },
+  floatingBall: {
+    backgroundColor: '#3F51B5',
+    width: 40,
+    height: 40,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  floatingBallText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    justifyContent: 'flex-start',
+    paddingTop: 50,
+    paddingLeft: 16,
+  },
+  menuModal: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingVertical: 8,
+    minWidth: 100,
+    borderWidth: 1,
+    borderColor: '#e0e6ed',
+  },
+  menuItem: { paddingVertical: 8, paddingHorizontal: 12 },
+  menuItemText: { fontSize: 14, color: '#3949AB', fontWeight: '600' },
 });
