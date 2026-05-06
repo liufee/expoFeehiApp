@@ -11,7 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {WeiboItem} from './components/WeiboItem';
 import WeiboService, {NewsService} from '../../service/weibo';
-import {NativeEventEmitter} from 'react-native';
+import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
 import {getEnabledUsers} from '../../service/weibo/data';
 import {AppWeiboBasePath} from '../../../constants';
 import Composer from './components/Composer';
@@ -19,7 +19,7 @@ import {Weibo} from '../../service/weibo/model';
 import {useSetting} from '../../provider/setting';
 import {Picker} from '../../components/picker';
 
-export const tabPressEmitter = new NativeEventEmitter();
+export const tabPressEmitter = new EventEmitter();
 const draftFile = AppWeiboBasePath + '/draft';
 const limit = 10;
 
