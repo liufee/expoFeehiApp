@@ -120,7 +120,7 @@ const WeiboIndex = ({}) => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
                 {/* 账号切换 */}
-                <View style={styles.usernameContainer}>
+                <View style={[styles.usernameContainer, {paddingTop: insets.top, right: insets.right+20}]}>
                     <Picker
                         selectedValue={uid}
                         onValueChange={handleUsernameChange}
@@ -192,8 +192,6 @@ const styles = StyleSheet.create({
     usernameContainer: {
         zIndex: 111,
         position: 'absolute',
-        right: 10,
-        top: 30,
     },
     loadingText: {
         textAlign: 'center',

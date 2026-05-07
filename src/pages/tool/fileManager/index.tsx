@@ -46,6 +46,7 @@ export default function FileManagerScreen() {
   const [pathHistory, setPathHistory] = useState<string[]>([]);
   const [extractProgress, setExtractProgress] = useState<{visible: boolean; current: number; total: number; currentFile: string}>({visible: false, current: 0, total: 0, currentFile: ''});
   const [syncProgress, setSyncProgress] = useState<{visible: boolean; current: number; total: number; currentFile: string; status: string}>({visible: false, current: 0, total: 0, currentFile: '', status: ''});
+  const [isScanning, setIsScanning] = useState(false);
 
   useEffect(() => {
     loadFiles();
@@ -806,6 +807,7 @@ export default function FileManagerScreen() {
 
   // 从服务器同步文件
   const syncFromServer = async () => {
+    setIsScanning(true);
     try {
       // 调用扫描接口
       const scanUrl = syncURL + '/scan';
@@ -822,6 +824,14 @@ export default function FileManagerScreen() {
 
       console.log(`发现 ${totalFiles} 个文件需要同步`);
 
+      // 关闭扫描loading
+      setIsScanning(false);
+
+      if (totalFiles === 0) {
+        Alert.alert('提示', '没有需要同步的文件');
+        return;
+      }
+
       // 显示确认对话框
       Alert.alert(
         '同步文件',
@@ -837,6 +847,7 @@ export default function FileManagerScreen() {
         ]
       );
     } catch (error) {
+      setIsScanning(false);
       console.error('扫描服务器失败:', error);
       Alert.alert('错误', `扫描服务器失败: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -1056,11 +1067,16 @@ export default function FileManagerScreen() {
           <TouchableOpacity style={styles.headerButton} onPress={importFile}>
             <Ionicons name="cloud-upload-outline" size={24} color={themeColors.tint} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={syncFromServer}>
-            <Ionicons name="cloud-download-outline" size={24} color={themeColors.tint} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => router.push('/')}>
-            <Ionicons name="arrow-back" size={24} color={themeColors.text} />
+          <TouchableOpacity
+            style={[styles.headerButton, isScanning && styles.disabledButton]}
+            onPress={syncFromServer}
+            disabled={isScanning}
+          >
+            {isScanning ? (
+              <ActivityIndicator size="small" color={themeColors.tint} />
+            ) : (
+              <Ionicons name="cloud-download-outline" size={24} color={themeColors.tint} />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -1211,19 +1227,22 @@ export default function FileManagerScreen() {
         transparent={true}
         onRequestClose={() => {}}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
-            <Text style={[styles.modalTitle, { color: themeColors.text }]}>同步文件中...</Text>
+        <View style={styles.syncModalOverlay}>
+          <View style={[styles.syncModalContent, { backgroundColor: '#FFFFFF' }]}>
+            <View style={styles.syncModalHeader}>
+              <Ionicons name="cloud-download" size={32} color={themeColors.tint} />
+              <Text style={[styles.syncModalTitle, { color: themeColors.text }]}>正在同步文件</Text>
+            </View>
 
-            <View style={styles.progressContainer}>
-              <Text style={[styles.progressText, { color: themeColors.text }]} numberOfLines={2}>
-                {syncProgress.currentFile}
+            <View style={styles.syncProgressContainer}>
+              <Text style={[styles.syncCurrentFile, { color: themeColors.text }]} numberOfLines={2}>
+                {syncProgress.currentFile || '准备中...'}
               </Text>
 
-              <View style={styles.progressBarBg}>
+              <View style={styles.syncProgressBarBg}>
                 <View
                   style={[
-                    styles.progressBarFill,
+                    styles.syncProgressBarFill,
                     {
                       width: `${syncProgress.total > 0 ? (syncProgress.current / syncProgress.total) * 100 : 0}%`,
                       backgroundColor: themeColors.tint
@@ -1232,8 +1251,17 @@ export default function FileManagerScreen() {
                 />
               </View>
 
-              <Text style={[styles.progressDetail, { color: themeColors.placeholderText }]}>
-                {syncProgress.status || `${syncProgress.current} / ${syncProgress.total} 文件`}
+              <View style={styles.syncStatsRow}>
+                <Text style={[styles.syncStatsText, { color: themeColors.placeholderText }]}>
+                  {syncProgress.status || `${syncProgress.current} / ${syncProgress.total} 文件`}
+                </Text>
+                <Text style={[styles.syncPercentage, { color: themeColors.tint }]}>{syncProgress.total > 0 ? Math.round((syncProgress.current / syncProgress.total) * 100) : 0}%  </Text>
+              </View>
+            </View>
+
+            <View style={styles.syncModalFooter}>
+              <Text style={[styles.syncHintText, { color: themeColors.placeholderText }]}>
+                请保持网络连接，不要关闭应用
               </Text>
             </View>
           </View>
@@ -1393,28 +1421,83 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  progressContainer: {
-    alignItems: 'center',
-    gap: 12,
+  disabledButton: {
+    opacity: 0.5,
   },
-  progressText: {
-    fontSize: 14,
+  // 同步进度模态框样式
+  syncModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  syncModalContent: {
+    width: '100%',
+    maxWidth: 380,
+    padding: 24,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  syncModalHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 8,
+  },
+  syncModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  syncProgressContainer: {
+    gap: 16,
+    marginBottom: 20,
+  },
+  syncCurrentFile: {
+    fontSize: 15,
     fontWeight: '500',
     textAlign: 'center',
-    minHeight: 40,
+    minHeight: 44,
+    lineHeight: 22,
   },
-  progressBarBg: {
+  syncProgressBarBg: {
     width: '100%',
-    height: 8,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 4,
+    height: 10,
+    backgroundColor: '#E8E8E8',
+    borderRadius: 5,
     overflow: 'hidden',
   },
-  progressBarFill: {
+  syncProgressBarFill: {
     height: '100%',
-    borderRadius: 4,
+    borderRadius: 5,
   },
-  progressDetail: {
+  syncStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  syncStatsText: {
+    fontSize: 14,
+    flex: 1,
+  },
+  syncPercentage: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 12,
+  },
+  syncModalFooter: {
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  syncHintText: {
     fontSize: 12,
+    textAlign: 'center',
   },
 });
+
+

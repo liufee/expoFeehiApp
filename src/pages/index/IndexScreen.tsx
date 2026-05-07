@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import SystemInfoModal from './SystemInfoModal';
 
 export default function IndexScreen() {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
+    const [showSystemInfo, setShowSystemInfo] = useState(false);
     
     const menuItems = [
         { title: '运动健身', icon: '🏃', route: 'ExerciseNavigator', color: '#4CAF50', description: '腹肌、力量、跑步训练' },
@@ -25,6 +27,17 @@ export default function IndexScreen() {
                 }
             ]}>
             <View style={styles.menuContainer}>
+                {/* 系统信息按钮 */}
+                <TouchableOpacity
+                    style={[styles.menuItem, styles.systemInfoButton]}
+                    onPress={() => setShowSystemInfo(true)}>
+                    <Text style={styles.menuIcon}>ℹ️</Text>
+                    <View style={styles.menuContent}>
+                        <Text style={styles.menuTitle}>系统信息</Text>
+                        <Text style={styles.menuDescription}>查看应用版本、平台等详细信息</Text>
+                    </View>
+                </TouchableOpacity>
+              
               {menuItems.map((item, index) => (
                     <TouchableOpacity
                         key={index}
@@ -38,6 +51,12 @@ export default function IndexScreen() {
                     </TouchableOpacity>
                 ))}
             </View>
+            
+            {/* 系统信息弹窗 */}
+            <SystemInfoModal 
+                visible={showSystemInfo} 
+                onClose={() => setShowSystemInfo(false)} 
+            />
         </ScrollView>
     );
 }
@@ -83,5 +102,9 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#fff',
         opacity: 0.9,
+    },
+    systemInfoButton: {
+        backgroundColor: '#6C757D',
+        marginBottom: 12,
     },
 });

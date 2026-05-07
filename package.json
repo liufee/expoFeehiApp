@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "dev": "./node_modules/.bin/expo start",
-    "p": "EAS_SKIP_AUTO_FINGERPRINT=1 ./node_modules/.bin/eas update --branch master --message \"fix\" --non-interactive"
+    "build:info": "node scripts/generate-build-info.js",
+    "p": "node scripts/generate-build-info.js && EAS_SKIP_AUTO_FINGERPRINT=1 ./node_modules/.bin/eas update --branch master --message \"fix\" --non-interactive"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
