@@ -26,7 +26,7 @@ export default class SettingService{
             if (!configFile.exists) {
                 return [true, defaultSetting, ''];
             }
-            const configData = await configFile.readAsync({ encoding: 'utf8' });
+            const configData = await configFile.text();
             return [true, deepMerge(defaultSetting, JSON.parse(configData)), ''];
         } catch (e) {
             return [false, defaultSetting, userErrorMessage(e)];
