@@ -25,7 +25,6 @@ const WeiboNavigator = () => {
         const init = async () => {
             await weiboService.getInstance().initDB();
             weiboService.getInstance().setSetting(setting);
-            setIsReady(true);
             setLoading(false);
         };
        init();
@@ -39,17 +38,18 @@ const WeiboNavigator = () => {
             </View>
         )
     }
-
+    /*
+    <Tab.Screen name="hotSearchList" component={HotSearchScreen} options={{
+        tabBarLabel: '热搜',
+        title: '热搜',
+        headerShown:false,
+        tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="search" color={color} />
+        ),
+    }} />
+    */
     return (
         <Tab.Navigator>
-            <Tab.Screen name="hotSearchList" component={HotSearchScreen} options={{
-                tabBarLabel: '热搜',
-                title: '热搜',
-                headerShown:false,
-                tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="search" color={color} />
-                ),
-            }} />
             <Tab.Screen  name="index" component={WeiboIndexStack} options={{
                 tabBarIcon: ({ color }) => (
                     <IconSymbol size={28} name="sina.weibo" color={color} />
