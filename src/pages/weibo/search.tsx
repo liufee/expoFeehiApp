@@ -162,7 +162,7 @@ const WeiboSearch = ({}) => {
             ) : (
                 <FlatList
                     data={weibos}
-                    renderItem={({ item }) => <WeiboItem item={item} />}
+                    renderItem={({ item }) => <WeiboItem item={item} uid={uid} />}
                     keyExtractor={(item) => item.id.toString()}
                     onEndReached={loadMoreWeibos}
                     onEndReachedThreshold={0.1}
