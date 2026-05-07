@@ -2,9 +2,9 @@ import React, {useState, useEffect, useRef} from 'react';
 import {View, TextInput, TouchableOpacity, Text, StyleSheet, Alert} from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import {AppMoviesBasePath} from '../../../constants';
+import {AppMoviesBasePath} from '@/constants';
 import { useRoute } from '@react-navigation/native';
-import { showToast } from '../../_layout';
+import { showToast } from '../../../provider';
 import config from '@/src/config';
 
 const Download = () => {

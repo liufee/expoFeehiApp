@@ -3,12 +3,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import FileManagerScreen from '@/src/pages/tool/fileManager';
+import PregnancyScreen from '@/src/pages/tool/pregnancy';
+import DownloadScreen from '@/src/pages/tool/download';
+import SettingScreen from '@/src/pages/tool/setting';
 
-// 导入实际的页面组件（需要从 app 目录迁移）
-const FileManagerScreen = () => <></>;
-const PregnancyScreen = () => <></>;
-const DownloadScreen = () => <></>;
-const SettingScreen = () => <></>;
 
 const Tab = createBottomTabNavigator();
 

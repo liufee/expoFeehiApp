@@ -12,6 +12,7 @@ import WeiboSearch from './search';
 import TSRVerify from './TSRVerify';
 import Repost from './repost';
 import {ActivityIndicator, Text, View} from "react-native";
+import weiboService from "@/src/service/weibo";
 
 const Tab = createBottomTabNavigator();
 
@@ -22,8 +23,9 @@ const WeiboNavigator = () => {
 
     useEffect(()=>{
         const init = async () => {
-            await WeiboService.init(setting);
-            await NewsService.init(setting);
+            await weiboService.getInstance().initDB();
+            weiboService.getInstance().setSetting(setting);
+            setIsReady(true);
             setLoading(false);
         };
        init();

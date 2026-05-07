@@ -8,6 +8,7 @@ import IndexNavigator from './src/pages/index/navigator';
 import ExerciseNavigator from './src/pages/exercise/navigator';
 import WeiboNavigator from './src/pages/weibo/navigator';
 import ChildrenNavigator from './src/pages/children/navigator';
+import ToolNavigator from './src/pages/tool/navigator';
 
 enableScreens();
 
@@ -25,6 +26,7 @@ export default function App() {
                                 <Stack.Screen name="ExerciseNavigator" component={ExerciseNavigator} />
                                 <Stack.Screen name="WeiboNavigator" component={WeiboNavigator} />
                                 <Stack.Screen name="ChildrenNavigator" component={ChildrenNavigator} />
+                                <Stack.Screen name="ToolNavigator" component={ToolNavigator} />
                             </Stack.Navigator>
                         </NavigationContainer>
                     </LoadingProvider>

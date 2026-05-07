@@ -2,7 +2,7 @@ import Calculate from './calculate';
 import {PanResponder, View, TextInput} from 'react-native';
 import {useEffect, useRef, useState} from 'react';
 import { File } from 'expo-file-system';
-import {APPRuntimePath} from '../../../constants';
+import {APPRuntimePath} from '@/constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ivfBefore = [
