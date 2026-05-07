@@ -104,7 +104,7 @@ const digestMediaV3 = async (mediaStr) => {
         if (m === "") continue;
 
         const mediaFile = new File(m);
-        individualMd5s.push(mediaFile.info({md5: true}));
+        individualMd5s.push(mediaFile.info({md5: true}).md5);
       }
     }catch (err) {
       return [false, err.message];
