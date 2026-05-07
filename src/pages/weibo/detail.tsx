@@ -32,7 +32,7 @@ enum ShowTypes {
     ShowTypeBeenRepost = 'ShowTypeBeenRepost',
 }
 const WeiboDetail = (route) => {
-    const { wb, uid }:{weibo:Weibo, uid:string} = route.params;  ;
+    const { wb, uid }:{weibo:Weibo, uid:string} = route.params;
     const [weibo, setWeibo] = useState<Weibo>(wb);
     const [showType, setShowType] = useState<ShowTypes>(ShowTypes.ShowTypeComment);
     const [newComment, setNewComment] = useState<string>('');
