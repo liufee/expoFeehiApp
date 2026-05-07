@@ -1,15 +1,20 @@
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TsrVerify from '../../components/tsrVerify';
 import {exerciseService} from '../../service/exercise/exercise';
 import {Record} from '../../service/exercise/model';
 
 const TSRVerifyScreen = ({ route }: any) => {
+    const insets = useSafeAreaInsets();
     const { type, exercise } = route.params || {};
 
     const formula = 'type+startAt+endAt+ext+paths';
     const createdAt = exercise.startAt;
 
-    return <TsrVerify formula={formula} createdAt={createdAt}
+    return (
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+            <TsrVerify formula={formula} createdAt={createdAt}
                       getFullOriginalString={
                           async ()=>{
                               const [success, result] = await exerciseService.assembleStrToCreateTSR(exercise.id);
@@ -31,7 +36,15 @@ const TSRVerifyScreen = ({ route }: any) => {
                           }
                       }
 
-    ></TsrVerify>;
+            ></TsrVerify>
+        </View>
+    );
 };
 
 export default TSRVerifyScreen;
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+});

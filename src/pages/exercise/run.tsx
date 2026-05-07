@@ -33,7 +33,7 @@ import { formatTime, haversineDistance, formatTimestamp, calculateSegments, calc
 const PROGRESS_KEY_LAST_HAND_INPUT_START_TIME = 'last_hand_input_run_start_time';
 
 // 控制使用哪种位置追踪方式：true 使用 expo-location，false 使用地图位置变化事件
-const USE_EXPO_LOCATION = true;
+const USE_EXPO_LOCATION = false;
 
 export default function RunScreen() {
   const insets = useSafeAreaInsets();
@@ -154,7 +154,7 @@ export default function RunScreen() {
         const time = currentLocation.timestamp;
         handleLocationUpdate({ latitude, longitude, time });
       }
-      
+
       return true;
     } catch (error) {
       console.error('Failed to start location tracking:', error);

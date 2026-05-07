@@ -1,9 +1,12 @@
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {Comment, Weibo} from '../../service/weibo/model';
 import WeiboService from '../../service/weibo';
 import TsrVerify from '../../components/tsrVerify';
 
 const TSRVerify = ({ route }: any) => {
+    const insets = useSafeAreaInsets();
     const { type, weibo, comment } = route.params || {};
 
     const weiboService = WeiboService.getInstance();
@@ -12,7 +15,9 @@ const TSRVerify = ({ route }: any) => {
     const createdAt = type === 'feed' ? weibo?.createdAt : comment?.createdAt;
     const id = type === 'feed' ? weibo?.id : comment?.id;
 
-    return <TsrVerify formula={formula} createdAt={createdAt}
+    return (
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+            <TsrVerify formula={formula} createdAt={createdAt}
                 getFullOriginalString={
                     async ()=>{
                         const data = type === 'feed' ? weibo : comment;
@@ -34,7 +39,15 @@ const TSRVerify = ({ route }: any) => {
                         }
                     }
                 }
-    ></TsrVerify>;
+            ></TsrVerify>
+        </View>
+    );
 };
 
 export default TSRVerify;
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+});
