@@ -221,7 +221,10 @@ export default function RecordScreen() {
                               }`}
                             </Text>
                           )}
-                          {' '}{exercise.tsr === 1 && <Text onPress={()=>{router.push('TSRVerify' as any, {type:'exercise', exercise:exercise} as any)}}>{exercise.tsrVerified === 1 ? '✅' : '❌'}</Text>}
+                          {exercise.tsr === 1 && <Text onPress={()=>{
+                            router.push({pathname: '/exercise/tsrVerify',
+                              params:{type:'exercise', exercise:JSON.stringify(exercise)}
+                            })}}> {exercise.tsrVerified === 1 ? '✅' : '❌'}</Text>}
                         </Text>
                       </View>
                     </TouchableOpacity>
