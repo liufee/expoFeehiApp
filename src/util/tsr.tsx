@@ -10,7 +10,7 @@ export const calculateHash = async (data, tp) => {
   return hash;
 };
 
-export async function generateTSR(hash: string): Promise<[boolean, string]> {
+export async function generateTSR(data: string): Promise<[boolean, string]> {
   try {
     const baseUrl = 'http://gcp.feehi.com:8081/tool/generate-tsr';
 
@@ -19,7 +19,7 @@ export async function generateTSR(hash: string): Promise<[boolean, string]> {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ data:hash }),
+      body: JSON.stringify({ data:data }),
     });
 
     if (!response.ok) {
