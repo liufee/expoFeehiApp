@@ -1,6 +1,6 @@
 import { exerciseDB } from '@/src/db/exercise';
 import { Record, RecordType, Status, DailyExercise, Run, Path } from './model';
-import { generateTSR } from '@/src/util/tsr';
+import {calculateHash, generateTSR} from '@/src/util/tsr';
 
 export class ExerciseService {
   private static instance: ExerciseService;
@@ -69,7 +69,8 @@ export class ExerciseService {
       if (enableTSR) {
         console.log('开始生成 TSR...');
         const originStr = this.assembleStrToCreateTSRByRecord(dbRecord);
-        const [result, info] = await generateTSR(originStr);
+        const hash = await calculateHash(originStr, "");
+        const [result, info] = await generateTSR(hash);
         if (!result) {
           console.error('TSR 生成失败:', info);
           return [false, '创建tsr失败:' + info];
