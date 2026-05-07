@@ -62,7 +62,7 @@ export async function parseTSR(data: string): Promise<[boolean, any]> {
 // digestMediaV2 把所有文件连起来做一次 sha256 摘要
 // digestMediaV3 对所有文件分别做 md5，然后连起来
 export const digestMedia = async (mediaStr, time:Date) => {
-  if(m.trim() === ""){
+  if(mediaStr.trim() === ""){
     return [true, ""];
   }
   const createdAt = new Date(time).getTime();
