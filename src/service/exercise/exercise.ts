@@ -69,8 +69,7 @@ export class ExerciseService {
       if (enableTSR) {
         console.log('开始生成 TSR...');
         const originStr = this.assembleStrToCreateTSRByRecord(dbRecord);
-        const hash = await calculateHash(originStr, "");
-        const [result, info] = await generateTSR(hash);
+        const [result, info] = await generateTSR(originStr);
         if (!result) {
           console.error('TSR 生成失败:', info);
           return [false, '创建tsr失败:' + info];
