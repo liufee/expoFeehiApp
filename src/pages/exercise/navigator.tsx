@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { exerciseService } from '@/src/service/exercise/exercise';
@@ -12,7 +12,7 @@ import RecordScreen from './record';
 import TSRVerifyScreen from './tsrVerify';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 // 为 record 页面创建 Stack Navigator，以支持 TSRVerify 导航
 const RecordStack = () => {

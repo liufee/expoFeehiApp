@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {createStackNavigator} from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {useSetting} from '../../provider/setting';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import WeiboService, {NewsService} from '../../service/weibo';
@@ -78,7 +78,7 @@ const WeiboNavigator = () => {
     );
 };
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 const WeiboIndexStack = ()=> {
     return (
         <Stack.Navigator>
