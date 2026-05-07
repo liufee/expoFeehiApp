@@ -98,7 +98,7 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
             const needContinue = onRepostClick();
             if(!needContinue) return;
         }
-        navigation.navigate('Repost', { uid: uid, repostWeibo: JSON.stringify(item) });
+        navigation.navigate('Repost' as any, {uid, repostWeibo:item, onPosted: async ()=>{ refresh && refresh(); navigation.goBack(); }} as any);
     };
 
     return (
@@ -109,7 +109,7 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
                     <View style={{flex:1}}>
                         <View style={{flexDirection:'row', alignItems:'center', flexWrap:'nowrap'}}>
                             <Text style={styles.username} numberOfLines={1} ellipsizeMode="tail">{item.user?.name} </Text>
-                            {item.tsr === 1 && <Text style={{fontSize:10, marginLeft:5}} onPress={()=>{navigation.navigate('TSRVerify', { type:'feed', weibo: JSON.stringify(item) })}}>{item.tsrVerified === 1 ? '✅' : '❌'}</Text>}
+                            {item.tsr === 1 && <Text style={{fontSize:10, marginLeft:5}} onPress={()=>{navigation.navigate('TSRVerify', {type:'feed', weibo:item} as any)}}>{item.tsrVerified === 1 ? '✅' : '❌'}</Text>}
                             {item.type === 1 && <Pressable onPress={()=>Linking.openURL(`https://m.weibo.cn/detail/${item.id}`)}><Image style={{marginLeft:5,width:15,height:15,top:0}} source={require('../../../../assets/images/sina_weibo.png')} /></Pressable>}
                             <Text style={styles.byTitle} numberOfLines={1} ellipsizeMode="tail">{item.by.title}</Text>
                         </View>
