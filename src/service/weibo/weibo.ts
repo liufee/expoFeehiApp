@@ -518,7 +518,7 @@ export default class WeiboService{
             usersMap.set(item.id.toString(), {
                 id:item.id,
                 name:item.name,
-                avatar:AppWeiboBasePath + '/' + item.pic,
+                avatar:AppWeiboBasePath + '/' + item.pic_local,
             });
         }
         return usersMap;
