@@ -15,6 +15,7 @@ import Calendar from './calendar';
 import { exerciseService } from '@/src/service/exercise/exercise';
 import { DailyExercise, Record as RecordModel, RecordType } from '@/src/service/exercise/model';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { router } from 'expo-router';
 
 export default function RecordScreen() {
   const insets = useSafeAreaInsets();
@@ -181,44 +182,47 @@ export default function RecordScreen() {
                         )}
                       </View>
                       <View style={styles.detailsContainer}>
-                        {exercise.type === RecordType.RecordTypeAbdominal && (
-                          <Text style={styles.exerciseText}>
-                            {`${format(startAt, 'HH:mm:ss')}~${format(
-                              endAt,
-                              'HH:mm:ss'
-                            )} / ${((endAt.getTime() - startAt.getTime()) / 1000 / 60).toFixed(
-                              2
-                            )}min`}
-                          </Text>
-                        )}
-                        {exercise.type === RecordType.RecordTypeRun && (
-                          <Text style={styles.exerciseText}>
-                            {`${format(startAt, 'HH:mm:ss')}~${format(
-                              endAt,
-                              'HH:mm:ss'
-                            )} | 配速: ${exercise.run.avgPace.toFixed(
-                              2
-                            )}km/h | 耗时: ${exercise.run.runDuration} | 距离: ${exercise.run.distance.toFixed(
-                              2
-                            )}km ${
-                              exercise.run.runningWithoutPosition === 1 ? '| 仅计时' : '| 定位'
-                            }`}
-                          </Text>
-                        )}
-                        {exercise.type === RecordType.RecordTypeSitUpPushUp && (
-                          <Text style={styles.exerciseText}>
-                            {`${format(startAt, 'HH:mm:ss')}~${format(
-                              endAt,
-                              'HH:mm:ss'
-                            )} / ${((endAt.getTime() - startAt.getTime()) / 1000 / 60).toFixed(
-                              2
-                            )}min | 俯卧撑: ${exercise.sitUpPushUp.pushUp} | 仰卧起坐: ${
-                              exercise.sitUpPushUp.sitUp
-                            } | 曲腿卷腹: ${exercise.sitUpPushUp.curlUp} | 靠墙倒立: ${
-                              exercise.sitUpPushUp.legsUpTheWallPose
-                            }`}
-                          </Text>
-                        )}
+                        <Text>
+                          {exercise.type === RecordType.RecordTypeAbdominal && (
+                            <Text style={styles.exerciseText}>
+                              {`${format(startAt, 'HH:mm:ss')}~${format(
+                                endAt,
+                                'HH:mm:ss'
+                              )} / ${((endAt.getTime() - startAt.getTime()) / 1000 / 60).toFixed(
+                                2
+                              )}min`}
+                            </Text>
+                          )}
+                          {exercise.type === RecordType.RecordTypeRun && (
+                            <Text style={styles.exerciseText}>
+                              {`${format(startAt, 'HH:mm:ss')}~${format(
+                                endAt,
+                                'HH:mm:ss'
+                              )} | 配速: ${exercise.run.avgPace.toFixed(
+                                2
+                              )}km/h | 耗时: ${exercise.run.runDuration} | 距离: ${exercise.run.distance.toFixed(
+                                2
+                              )}km ${
+                                exercise.run.runningWithoutPosition === 1 ? '| 仅计时' : '| 定位'
+                              }`}
+                            </Text>
+                          )}
+                          {exercise.type === RecordType.RecordTypeSitUpPushUp && (
+                            <Text style={styles.exerciseText}>
+                              {`${format(startAt, 'HH:mm:ss')}~${format(
+                                endAt,
+                                'HH:mm:ss'
+                              )} / ${((endAt.getTime() - startAt.getTime()) / 1000 / 60).toFixed(
+                                2
+                              )}min | 俯卧撑: ${exercise.sitUpPushUp.pushUp} | 仰卧起坐: ${
+                                exercise.sitUpPushUp.sitUp
+                              } | 曲腿卷腹: ${exercise.sitUpPushUp.curlUp} | 靠墙倒立: ${
+                                exercise.sitUpPushUp.legsUpTheWallPose
+                              }`}
+                            </Text>
+                          )}
+                          {' '}{exercise.tsr === 1 && <Text onPress={()=>{router.push('TSRVerify' as any, {type:'exercise', exercise:exercise} as any)}}>{exercise.tsrVerified === 1 ? '✅' : '❌'}</Text>}
+                        </Text>
                       </View>
                     </TouchableOpacity>
                   );

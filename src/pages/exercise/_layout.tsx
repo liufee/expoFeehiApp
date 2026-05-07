@@ -70,6 +70,13 @@ export default function ExerciseLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="tsrVerify"
+        options={{
+          title: 'tsrVerify',
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
