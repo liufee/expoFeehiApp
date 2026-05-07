@@ -96,7 +96,7 @@ const WeiboDetail = () => {
     }, [wb]);
 
     const onDelete = () => {
-        router.push('/weibo');
+        router.back();
     };
 
     // 发布评论

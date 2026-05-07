@@ -5,7 +5,7 @@ import { View, ActivityIndicator, Text } from 'react-native';
 import weiboService from '../../service/weibo';
 
 
-export default function ExerciseLayout() {
+export default function WeiboLayout() {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -30,10 +30,7 @@ export default function ExerciseLayout() {
   }
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-      }}>
+    <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen
         name="index"
         options={{
@@ -50,27 +47,6 @@ export default function ExerciseLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="search" color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="detail"
-        options={{
-          title: '详情',
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="repost"
-        options={{
-          title: '转发',
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="TSRVerify"
-        options={{
-          title: 'tsrVerify',
-          href: null,
         }}
       />
     </Tabs>
