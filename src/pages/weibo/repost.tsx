@@ -1,16 +1,14 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
 import WeiboService from '../../service/weibo';
 import Composer from './components/Composer';
 import {useSetting} from '../../provider/setting';
 import {AppWeiboBasePath} from '../../../constants';
 
-export default function Repost() {
-    const params = useLocalSearchParams();
-
-    const uid = params.uid as string || '0';
-    const repostWeibo = params.repostWeibo ? JSON.parse(params.repostWeibo as string) : null;
+export default function Repost({ route }: any) {
+    const { uid: uidParam, repostWeibo: repostWeiboParam } = route.params || {};
+    const uid = uidParam || '0';
+    const repostWeibo = repostWeiboParam || null;
 
     const weiboService:WeiboService = WeiboService.getInstance();
 

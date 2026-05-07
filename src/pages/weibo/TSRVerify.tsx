@@ -2,13 +2,9 @@ import React from 'react';
 import {Comment, Weibo} from '../../service/weibo/model';
 import WeiboService from '../../service/weibo';
 import TsrVerify from '../../components/tsrVerify';
-import { useLocalSearchParams } from 'expo-router';
 
-const TSRVerify = () => {
-    const params = useLocalSearchParams();
-    const type = params.type as string;
-    const weibo = params.weibo ? JSON.parse(params.weibo as string) : null;
-    const comment = params.comment ? JSON.parse(params.comment as string) : null;
+const TSRVerify = ({ route }: any) => {
+    const { type, weibo, comment } = route.params || {};
 
     const weiboService = WeiboService.getInstance();
 

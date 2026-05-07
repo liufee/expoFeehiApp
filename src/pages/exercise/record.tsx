@@ -15,10 +15,11 @@ import Calendar from './calendar';
 import { exerciseService } from '@/src/service/exercise/exercise';
 import { DailyExercise, Record as RecordModel, RecordType } from '@/src/service/exercise/model';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { router } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 
 export default function RecordScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
   const [menuVisible, setMenuVisible] = useState(false);
   const [records, setRecords] = useState<DailyExercise[]>([]);
   const [showType, setShowType] = useState('list');
@@ -222,9 +223,8 @@ export default function RecordScreen() {
                             </Text>
                           )}
                           {exercise.tsr === 1 && <Text onPress={()=>{
-                            router.push({pathname: '/exercise/tsrVerify',
-                              params:{type:'exercise', exercise:JSON.stringify(exercise)}
-                            })}}> {exercise.tsrVerified === 1 ? '✅' : '❌'}</Text>}
+                            navigation.navigate('TSRVerify', {type:'exercise', exercise:JSON.stringify(exercise)});
+                          }}> {exercise.tsrVerified === 1 ? '✅' : '❌'}</Text>}
                         </Text>
                       </View>
                     </TouchableOpacity>

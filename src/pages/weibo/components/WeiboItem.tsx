@@ -11,7 +11,7 @@ import {Weibo} from '../../../service/weibo/model';
 import {formatNewsContent, formatWeiboContent} from '../util';
 import WeiboService from '../../../service/weibo';
 import {Media} from './Media';
-import { router } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 
 interface WeiboItemProps {
     item: Weibo;
@@ -35,6 +35,7 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
     const [selectedAction, setSelectedAction] = useState<ActionType>('comment');
 
     const weiboService = WeiboService.getInstance();
+    const navigation = useNavigation<any>();
 
     useEffect(()=>{
         if(item.type === 3 && pageType === 'detail'){
@@ -50,10 +51,7 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
 
     // 跳转详情
     const viewWeiboDetail = (weibo:Weibo) => {
-        router.push({
-            pathname: '/weibo/detail',
-            params: { wb: JSON.stringify(weibo), uid: uid }
-        });
+        navigation.navigate('WeiboDetail', { wb: JSON.stringify(weibo), uid: uid });
     };
 
     // 删除微博
@@ -100,10 +98,7 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
             const needContinue = onRepostClick();
             if(!needContinue) return;
         }
-        router.push({
-            pathname: '/weibo/repost',
-            params: { uid: uid, repostWeibo: JSON.stringify(item) }
-        });
+        navigation.navigate('Repost', { uid: uid, repostWeibo: JSON.stringify(item) });
     };
 
     return (
@@ -114,7 +109,7 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
                     <View style={{flex:1}}>
                         <View style={{flexDirection:'row', alignItems:'center', flexWrap:'nowrap'}}>
                             <Text style={styles.username} numberOfLines={1} ellipsizeMode="tail">{item.user?.name} </Text>
-                            {item.tsr === 1 && <Text style={{fontSize:10, marginLeft:5}} onPress={()=>{router.push({ pathname: '/weibo/TSRVerify', params: { type:'feed', weibo: JSON.stringify(item) } })}}>{item.tsrVerified === 1 ? '✅' : '❌'}</Text>}
+                            {item.tsr === 1 && <Text style={{fontSize:10, marginLeft:5}} onPress={()=>{navigation.navigate('TSRVerify', { type:'feed', weibo: JSON.stringify(item) })}}>{item.tsrVerified === 1 ? '✅' : '❌'}</Text>}
                             {item.type === 1 && <Pressable onPress={()=>Linking.openURL(`https://m.weibo.cn/detail/${item.id}`)}><Image style={{marginLeft:5,width:15,height:15,top:0}} source={require('../../../../assets/images/sina_weibo.png')} /></Pressable>}
                             <Text style={styles.byTitle} numberOfLines={1} ellipsizeMode="tail">{item.by.title}</Text>
                         </View>
@@ -132,8 +127,8 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
                 <View style={[styles.actions, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }]}>
                     <Text style={styles.actionText}>{item.createdAt}      </Text>
                     {item.type === 3 ?
-                        <><Text onPress={() => router.push('/weibo')}>回微博</Text>
-                        <Text onPress={() => router.push('/weibo/hotSearchList')}>回热搜</Text></>
+                        <><Text onPress={() => navigation.navigate('Index')}>回微博</Text>
+                        <Text onPress={() => navigation.navigate('HotSearch')}>回热搜</Text></>
                         :
                         <><Text style={[styles.actionText, pageType === 'detail' && selectedAction === 'comment' && styles.actionTextActive]} onPress={() => handleActionClick('comment', onCommentClick)}>评论: {item.commentCount} </Text>
                         <Text style={[styles.actionText, pageType === 'detail' && selectedAction === 'like' && styles.actionTextActive]} onPress={() => handleActionClick('like', onLikeClick)}>赞: {item.likeCount} </Text>

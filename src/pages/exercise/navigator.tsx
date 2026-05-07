@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { exerciseService } from '@/src/service/exercise/exercise';
@@ -8,8 +9,20 @@ import AbdominalScreen from './abdominal';
 import SitupScreen from './situp';
 import RunScreen from './run';
 import RecordScreen from './record';
+import TSRVerifyScreen from './tsrVerify';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+// 为 record 页面创建 Stack Navigator，以支持 TSRVerify 导航
+const RecordStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Record" component={RecordScreen} />
+      <Stack.Screen name="TSRVerify" component={TSRVerifyScreen} />
+    </Stack.Navigator>
+  );
+};
 
 const ExerciseNavigator = () => {
   const [isReady, setIsReady] = useState(false);
@@ -72,7 +85,7 @@ const ExerciseNavigator = () => {
       />
       <Tab.Screen
         name="record"
-        component={RecordScreen}
+        component={RecordStack}
         options={{
           title: '记录',
           tabBarIcon: ({ color }) => (

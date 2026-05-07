@@ -83,6 +83,7 @@ const WeiboIndexStack = ()=> {
     return (
         <Stack.Navigator>
             <Stack.Screen options={{ headerShown:false}} name="Index" component={WeiboIndex}/>
+            <Stack.Screen options={{ headerShown:false}} name="HotSearch" component={HotSearchScreen}/>
             <Stack.Screen options={{ headerShown:false}} name="WeiboDetail" component={WeiboDetail}/>
             <Stack.Screen options={{ headerShown:false}} name="Repost" component={Repost}/>
             <Stack.Screen options={{ headerShown:false}} name="TSRVerify" component={TSRVerify}/>

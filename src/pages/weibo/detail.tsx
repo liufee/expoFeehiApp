@@ -12,7 +12,8 @@ import {
 import {BeenPosted, Comment, Like, Weibo} from '../../service/weibo/model';
 import WeiboService from '../../service/weibo';
 import {WeiboItem} from './components/WeiboItem';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import Checkbox from '../../components/checkbox';
 import Button from '../../components/button';
 import {formatWeiboContent, getCurrentLocationWithAddress} from './util';
@@ -53,6 +54,7 @@ const WeiboDetail = () => {
     const {setting} = useSetting();
     const {showToast} = useToast();
     const {showLoading, hideLoading} = useLoading();
+    const navigation = useNavigation<any>();
 
     const {selectMedia, selectAttachment} = mediaPicker();
 
@@ -96,7 +98,7 @@ const WeiboDetail = () => {
     }, [wb]);
 
     const onDelete = () => {
-        router.back();
+        navigation.goBack();
     };
 
     // 发布评论
@@ -221,7 +223,7 @@ const WeiboDetail = () => {
                         <View style={styles.commentTopRow}>
                             <View style={styles.commentLeftRow}>
                                 <Text style={styles.commentUsername} numberOfLines={1} ellipsizeMode="tail">{item.author.name}</Text>
-                                {item.tsr === 1 && (<Text style={styles.commentTsrIcon} onPress={() => {router.push({ pathname: '/weibo/TSRVerify', params: { type: 'comment', comment: JSON.stringify(item) } })}}>{item.tsrVerified === 1 ? '✅' : '❌'}</Text>)}
+                                {item.tsr === 1 && (<Text style={styles.commentTsrIcon} onPress={() => {navigation.navigate('TSRVerify', { type: 'comment', comment: JSON.stringify(item) })}}>{item.tsrVerified === 1 ? '✅' : '❌'}</Text>)}
                             </View>
                             <Text style={styles.commentTime} numberOfLines={1}>{item.createdAt.replaceAll('+08:00', '')}</Text>
                         </View>
