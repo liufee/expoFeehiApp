@@ -223,7 +223,7 @@ export default function RecordScreen() {
                             </Text>
                           )}
                           {exercise.tsr === 1 && <Text onPress={()=>{
-                            navigation.navigate('TSRVerify', {type:'exercise', exercise:JSON.stringify(exercise)});
+                            navigation.navigate('TSRVerify', {type:'exercise', exercise:exercise});
                           }}> {exercise.tsrVerified === 1 ? '✅' : '❌'}</Text>}
                         </Text>
                       </View>
