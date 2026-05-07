@@ -32,6 +32,9 @@ import { formatTime, haversineDistance, formatTimestamp, calculateSegments, calc
 
 const PROGRESS_KEY_LAST_HAND_INPUT_START_TIME = 'last_hand_input_run_start_time';
 
+// 控制使用哪种位置追踪方式：true 使用 expo-location，false 使用地图位置变化事件
+const USE_EXPO_LOCATION = true;
+
 export default function RunScreen() {
   const insets = useSafeAreaInsets();
   const [running, setRunning] = useState(false);
@@ -127,19 +130,31 @@ export default function RunScreen() {
         return false;
       }
 
-      // 开始监听位置变化
-      locationSubscription.current = await Location.watchPositionAsync(
-        {
+      // 根据配置选择位置追踪方式
+      if (USE_EXPO_LOCATION) {
+        // 使用 expo-location 监听位置变化
+        locationSubscription.current = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 1000,
+            distanceInterval: 1,
+          },
+          (location) => {
+            const { latitude, longitude } = location.coords;
+            const time = location.timestamp;
+            handleLocationUpdate({ latitude, longitude, time });
+          }
+        );
+      } else {
+        // 使用地图位置变化事件，先获取初始位置
+        const currentLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
-          timeInterval: 1000,
-          distanceInterval: 1,
-        },
-        (location) => {
-          const { latitude, longitude } = location.coords;
-          const time = location.timestamp;
-          handleLocationUpdate({ latitude, longitude, time });
-        }
-      );
+        });
+        const { latitude, longitude } = currentLocation.coords;
+        const time = currentLocation.timestamp;
+        handleLocationUpdate({ latitude, longitude, time });
+      }
+      
       return true;
     } catch (error) {
       console.error('Failed to start location tracking:', error);
@@ -402,6 +417,12 @@ export default function RunScreen() {
           }}
           showsUserLocation={true}
           followsUserLocation={running}
+          onUserLocationChange={!USE_EXPO_LOCATION && running ? (event) => {
+            // 当使用地图位置变化事件时，记录位置
+            const { latitude, longitude } = event.nativeEvent.coordinate;
+            const time = Date.now();
+            handleLocationUpdate({ latitude, longitude, time });
+          } : undefined}
         >
           {path.length > 0 && (
             <>
