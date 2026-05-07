@@ -51,7 +51,7 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
 
     // 跳转详情
     const viewWeiboDetail = (weibo:Weibo) => {
-        navigation.navigate('WeiboDetail', { wb: JSON.stringify(weibo), uid: uid });
+        navigation.navigate('WeiboDetail' as any, { wb: weibo, uid:uid } as any);
     };
 
     // 删除微博

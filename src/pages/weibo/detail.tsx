@@ -31,11 +31,8 @@ enum ShowTypes {
     ShowTypeLike = 'like',
     ShowTypeBeenRepost = 'ShowTypeBeenRepost',
 }
-const WeiboDetail = () => {
-    const params = useLocalSearchParams();
-    const wb = params.wb ? JSON.parse(params.wb as string) : null;
-    const uid = params.uid as string || '0';
-    
+const WeiboDetail = (route) => {
+    const { wb, uid }:{weibo:Weibo, uid:string} = route.params;  ;
     const [weibo, setWeibo] = useState<Weibo>(wb);
     const [showType, setShowType] = useState<ShowTypes>(ShowTypes.ShowTypeComment);
     const [newComment, setNewComment] = useState<string>('');
