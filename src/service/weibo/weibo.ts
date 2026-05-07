@@ -18,7 +18,7 @@ import {userErrorMessage} from '../../util';
 import {weiboDB} from "@/src/db/weibo";
 import {Setting} from "@/src/service/setting/types";
 import defaultSetting from "@/src/service/setting/defaultSetting";
-import {assembleStrToCreateTSR, generateTSR} from "@/src/util/tsr";
+import {calculateHash, digestMedia, generateTSR} from "@/src/util/tsr";
 
 export default class WeiboService{
     private dbInitialized = false;
@@ -390,11 +390,13 @@ export default class WeiboService{
                     filesStr += comment.media[i].Origin + ',';
                 }
                 if(filesStr.length > 0){
-                    filesStr = filesStr.slice(0, -1);x
+                    filesStr = filesStr.slice(0, -1);
                 }
-                //const originString = await NativeModules.RNHelper.assembleStrToCreateTSR(`${obj.createdAt}+${obj.text}+`, filesStr);
-                const [success, originString] = await assembleStrToCreateTSR(`${obj.createdAt}+${obj.text}+`, filesStr);
-                return [success, originString];
+                const [success, mediaDigest] = await digestMedia(filesStr, new Date(obj.createdAt));
+                if(!success){
+                    return [false, mediaDigest]
+                }
+                return [true, `${obj.createdAt}+${obj.text}+` + mediaDigest];
             }
         }
         const weibo = obj as Weibo;
@@ -411,24 +413,11 @@ export default class WeiboService{
         }else{
             createdAt = weibo.createdAt + '+08:00';
         }
-
-        if(filesStr === ''){//没有 media，tsr 的 v1 和 v2 没差别
-            return [true, `${createdAt}+${weibo.text}+`];
+        const [success, mediaDigest] = await digestMedia(filesStr, new Date(createdAt));
+        if(!success){
+            return [false, mediaDigest]
         }
-
-        if( new Date(createdAt).getTime() < new Date('2025-12-18').getTime() ){//之前的 tsr 计算是把文件 base64 后连接
-            let mediaContents = '';
-            for(let i in weibo.media){
-                const item = weibo.media[i];
-                const file = new File(item.Origin);
-                const base64Content = await file.base64();
-                mediaContents += base64Content;
-            }
-            return [true, `${createdAt}+${weibo.text}+${mediaContents}`];
-        }
-        //const originString = await NativeModules.RNHelper.assembleStrToCreateTSR(`${createdAt}+${weibo.text}+`, filesStr);
-        const [success, originString] = await assembleStrToCreateTSR(`${createdAt}+${weibo.text}+`, filesStr);
-        return [success, originString];
+        return [true, `${createdAt}+${weibo.text}+` + mediaDigest];
     }
 
     public async saveMediaToLocal(mediaPath: string):Promise<[boolean, string]>{
@@ -475,7 +464,8 @@ export default class WeiboService{
         if(!success){
             return [false, str];
         }
-        const [ok, tsr] = await generateTSR(str);
+        const hash = await calculateHash(str, "");
+        const [ok, tsr] = await generateTSR(hash);
         if (!ok){
             return [false, ''];
         }
