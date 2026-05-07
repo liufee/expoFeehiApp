@@ -1,1 +1,1 @@
-export { default } from '@/src/pages/exercise/TSRVerify';
+export { default } from '@/src/pages/exercise/tsrVerify';
