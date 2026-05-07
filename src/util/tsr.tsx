@@ -19,7 +19,7 @@ export async function generateTSR(hash: string): Promise<[boolean, string]> {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ hash }),
+      body: JSON.stringify({ data:hash }),
     });
 
     if (!response.ok) {
