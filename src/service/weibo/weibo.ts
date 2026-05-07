@@ -464,8 +464,7 @@ export default class WeiboService{
         if(!success){
             return [false, str];
         }
-        const hash = await calculateHash(str, "");
-        const [ok, tsr] = await generateTSR(hash);
+        const [ok, tsr] = await generateTSR(str);
         if (!ok){
             return [false, ''];
         }
