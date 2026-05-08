@@ -171,7 +171,6 @@ export default function AbdominalScreen() {
     useEffect(() => {
         initializeVideo();
         refreshRecords();
-
         return () => {
             // 清理播放器
             /*if (player) {
