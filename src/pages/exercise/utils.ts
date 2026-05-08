@@ -103,7 +103,7 @@ export const calculateSegments = (
     if (point.time - segmentStart > intervalMs) {
       // 计算当前段的平均配速（km/h）
       const segmentDurationHrs = (point.time - segmentStart) / (1000 * 60 * 60);
-      const avgPace = segmentDistance / segmentDurationHrs;
+      const avgPace = parseFloat((segmentDistance / segmentDurationHrs).toFixed(2));
 
       segments.push({
         startTime: new Date(segmentStart).getTime(),
