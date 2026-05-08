@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WeiboService from '../../service/weibo';
 import Composer from './components/Composer';
 import {useSetting} from '../../provider/setting';
@@ -13,9 +14,10 @@ export default function Repost({ route }: any) {
     const weiboService:WeiboService = WeiboService.getInstance();
 
     const {setting} = useSetting();
+    const insets = useSafeAreaInsets();
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             <Composer
                 uid={uid}
                 draftFile={AppWeiboBasePath + '/draft'}

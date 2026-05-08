@@ -9,6 +9,7 @@ import {
     Alert,
     ScrollView, Pressable, Keyboard,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {BeenPosted, Comment, Like, Weibo} from '../../service/weibo/model';
 import WeiboService from '../../service/weibo';
 import {WeiboItem} from './components/WeiboItem';
@@ -33,6 +34,7 @@ enum ShowTypes {
 }
 const WeiboDetail = ({ route }) => {
     const { wb, uid }:{weibo:Weibo, uid:string} = route.params;
+    const insets = useSafeAreaInsets();
     const [weibo, setWeibo] = useState<Weibo>(wb);
     const [showType, setShowType] = useState<ShowTypes>(ShowTypes.ShowTypeComment);
     const [newComment, setNewComment] = useState<string>('');
@@ -344,7 +346,7 @@ const WeiboDetail = ({ route }) => {
     );
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             <ScrollView style={styles.scrollContainer}>
                 {/* 微博详情 */}
                 <WeiboItem item={weibo} uid={uid} onDelete={onDelete} refresh={
@@ -418,6 +420,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
+        backgroundColor: '#f7f7f7',
     },
     scrollContainer: {
         flex: 1,
