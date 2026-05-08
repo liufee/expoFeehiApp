@@ -31,6 +31,7 @@ const MAPPING = {
   'magnifyingglass': 'search',
   'gear': 'settings',
   'gearshape.fill': 'settings',
+  'tablecells.fill': 'grid-on',
 } as IconMapping;
 
 /**

@@ -67,7 +67,7 @@ const ToolNavigator = () => {
             options={{
                 title: 'SQLite管理',
                 tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="server.rack" color={color} />
+                    <IconSymbol size={28} name="tablecells.fill" color={color} />
                 ),
             }}
         />
