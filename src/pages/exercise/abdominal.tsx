@@ -352,7 +352,7 @@ export default function AbdominalScreen() {
                 console.log('播放器已释放，跳过重置');
             }
             setShowSkipRest(false);
-            hasEnded.current = true;
+            // 移除这里的 hasEnded.current = true，移到 handleEnd 中统一设置
             await refreshRecords();
             return true;
         } catch (error) {
@@ -365,7 +365,11 @@ export default function AbdominalScreen() {
     };
 
     const autoSaveSitUpPushUpRecord = async () => {
-        if (saving) return; // 如果正在保存，直接返回
+        console.log('开始保存力量记录, saving状态:', saving);
+        if (saving) {
+            console.log('正在保存中，跳过力量记录保存');
+            return;
+        }
 
         const endAt = new Date();
         const record = {
@@ -383,16 +387,20 @@ export default function AbdominalScreen() {
             },
         };
 
+        console.log('力量记录数据:', record);
         setSaving(true); // 开始保存
         try {
             const [success, error] = await exerciseService.saveRecord(record);
+            console.log('力量记录保存结果:', success, error);
             if (!success) {
                 Alert.alert('失败', error);
                 return;
             }
             await refreshRecords();
+            console.log('力量记录保存成功');
             Alert.alert('成功', '保存成功');
         } catch (error) {
+            console.error('力量记录保存异常:', error);
             Alert.alert('失败', '保存记录失败');
         } finally {
             setSaving(false); // 保存完成
@@ -400,11 +408,25 @@ export default function AbdominalScreen() {
     };
 
     const handleEnd = async () => {
+        console.log('handleEnd 被调用, hasEnded:', hasEnded.current, 'saving:', saving);
         if (hasEnded.current || saving) {
+            console.log('handleEnd 提前返回');
             return;
         }
+        
+        console.log('开始保存腹肌记录');
+        // 先保存腹肌记录（不设置 hasEnded）
         await saveAbdominalRecord(Status.StatusFinished);
+        console.log('腹肌记录保存完成');
+        
+        console.log('开始保存力量记录');
+        // 再保存力量记录
         await autoSaveSitUpPushUpRecord();
+        console.log('力量记录保存完成');
+        
+        // 最后设置结束标志
+        hasEnded.current = true;
+        console.log('handleEnd 完成');
     };
 
     const handleManualEnd = async () => {
