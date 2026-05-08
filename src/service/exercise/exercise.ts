@@ -133,8 +133,7 @@ export class ExerciseService {
   async deleteRecord(record: Record): Promise<[boolean, string]> {
     try {
 
-      console.log(record)
-      await exerciseDB.deleteRecord(record.id, 'exercise');
+      await exerciseDB.deleteRecord(record);
       return [true, ''];
     } catch (error) {
       console.error('Failed to delete record:', error);
