@@ -1147,8 +1147,8 @@ export default function FileManagerScreen() {
         transparent={true}
         onRequestClose={() => {}}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
+        <View style={styles.syncModalOverlay}>
+          <View style={[styles.syncModalContent, { backgroundColor: '#FFFFFF' }]}>
             <Text style={[styles.modalTitle, { color: themeColors.text }]}>处理中...</Text>
 
             <View style={styles.progressContainer}>
