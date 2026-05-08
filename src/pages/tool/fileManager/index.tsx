@@ -853,7 +853,7 @@ export default function FileManagerScreen() {
     }
   };
 
-  // 开始同步文件
+  // 开始同步文件（优化版：支持并发下载）
   const startSync = async (files: any[]) => {
     const totalFiles = files.length;
     let syncedCount = 0;
@@ -868,18 +868,15 @@ export default function FileManagerScreen() {
     });
 
     try {
-      for (const file of files) {
+      // 使用并发下载提高速度，最多同时下载3个文件
+      const concurrencyLimit = 3;
+      const downloadQueue = [...files];
+      
+      // 创建下载任务函数
+      const downloadFile = async (file: any) => {
         const fileName = file.name;
         const relativePath = file.path; // 相对路径，如 "folder/subfolder/file.txt"
         const fullPath = file.fullPath; // 完整路径，用于下载
-
-        setSyncProgress({
-          visible: true,
-          current: syncedCount + failedCount,
-          total: totalFiles,
-          currentFile: relativePath,
-          status: `正在下载 ${syncedCount + failedCount + 1}/${totalFiles}`
-        });
 
         try {
           // 构建目标路径（保持目录结构）
@@ -901,8 +898,7 @@ export default function FileManagerScreen() {
           // 如果文件已存在，跳过
           if (destFile.exists) {
             console.log(`文件已存在，跳过: ${relativePath}`);
-            syncedCount++;
-            continue;
+            return { success: true, path: relativePath };
           }
 
           // 下载文件（使用完整路径）
@@ -924,7 +920,6 @@ export default function FileManagerScreen() {
                 await FileSystemLegacy.writeAsStringAsync(destPath, base64, {
                   encoding: FileSystemLegacy.EncodingType.Base64,
                 });
-                syncedCount++;
                 console.log(`成功同步: ${relativePath}`);
                 resolve();
               } catch (error) {
@@ -934,16 +929,52 @@ export default function FileManagerScreen() {
             reader.onerror = reject;
             reader.readAsDataURL(blob);
           });
+
+          return { success: true, path: relativePath };
         } catch (error) {
           console.error(`同步文件失败 ${relativePath}:`, error);
-          failedCount++;
+          return { success: false, path: relativePath, error };
         }
+      };
 
-        // 每5个文件暂停一下，让UI更新
-        if ((syncedCount + failedCount) % 5 === 0) {
-          await new Promise(resolve => setTimeout(resolve, 10));
+      // 并发执行下载任务
+      const executing: Promise<any>[] = [];
+      
+      for (const file of downloadQueue) {
+        const relativePath = file.path;
+        
+        // 更新进度显示
+        setSyncProgress(prev => ({
+          ...prev,
+          current: syncedCount + failedCount,
+          currentFile: relativePath,
+          status: `正在下载 ${syncedCount + failedCount + 1}/${totalFiles}`
+        }));
+
+        // 创建下载Promise
+        const promise = downloadFile(file).then(result => {
+          if (result.success) {
+            syncedCount++;
+          } else {
+            failedCount++;
+          }
+          
+          // 从执行队列中移除
+          executing.splice(executing.indexOf(promise), 1);
+          
+          return result;
+        });
+        
+        executing.push(promise);
+        
+        // 当达到并发限制时，等待其中一个完成
+        if (executing.length >= concurrencyLimit) {
+          await Promise.race(executing);
         }
       }
+
+      // 等待所有剩余的下载任务完成
+      await Promise.all(executing);
 
       setSyncProgress({
         visible: true,
