@@ -16,24 +16,18 @@ import { exerciseService } from '@/src/service/exercise/exercise';
 import { DailyExercise, Record as RecordModel, RecordType } from '@/src/service/exercise/model';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useNavigation } from '@react-navigation/native';
+import { useSetting } from '@/src/provider/setting';
+import { getShowRecordStartAndEndTime } from './utils';
 
 export default function RecordScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
+  const { setting } = useSetting();
   const [menuVisible, setMenuVisible] = useState(false);
   const [records, setRecords] = useState<DailyExercise[]>([]);
   const [showType, setShowType] = useState('list');
 
-  const getShowRecordStartAndEndTime = (period: number) => {
-    const now = new Date();
-    const startDate = new Date(now.getTime() - period * 24 * 60 * 60 * 1000);
-    return {
-      showRecordStart: format(startDate, 'yyyy-MM-dd HH:mm:ss'),
-      showRecordEnd: format(now, 'yyyy-MM-dd HH:mm:ss'),
-    };
-  };
-
-  const { showRecordStart, showRecordEnd } = getShowRecordStartAndEndTime(30);
+  const { showRecordStart, showRecordEnd } = getShowRecordStartAndEndTime(setting.exercise.showRecordsListPeriod);
 
   const refreshRecord = async () => {
     try {

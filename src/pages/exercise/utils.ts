@@ -1,3 +1,5 @@
+import {format} from "date-fns/index";
+
 /**
  * 格式化时间为 HH:MM:SS 格式
  * @param ms 毫秒数
@@ -26,7 +28,7 @@ export const calculateAverageSpeed = (
   if (distance <= 0 || timeInMilliseconds <= 0) {
     return 0;
   }
-  
+
   switch (showType) {
     case 0:
       return distance / (timeInMilliseconds / 3600000); // km/h
@@ -120,4 +122,47 @@ export const calculateSegments = (
   }
 
   return segments;
+};
+
+export const getShowRecordStartAndEndTime = (period:number) =>{
+    const now = new Date();
+    let showRecordStartTime:Date|null;
+    switch (period){
+        case 0: { // 全部
+            showRecordStartTime = null; // 不计算
+            break;
+        }
+        case 1: { // 最近15天
+            showRecordStartTime = new Date(now);
+            showRecordStartTime.setDate(showRecordStartTime.getDate() - 15);
+            break;
+        }
+        case 2: { // 最近3个月
+            showRecordStartTime = new Date(now);
+            showRecordStartTime.setMonth(showRecordStartTime.getMonth() - 3);
+            break;
+        }
+        case 3: { // 最近6个月
+            showRecordStartTime = new Date(now);
+            showRecordStartTime.setMonth(showRecordStartTime.getMonth() - 6);
+            break;
+        }
+        case 4: { // 最近1年
+            showRecordStartTime = new Date(now);
+            showRecordStartTime.setFullYear(showRecordStartTime.getFullYear() - 1);
+            break;
+        }
+        default: { // 默认30天
+            showRecordStartTime = new Date(now);
+            showRecordStartTime.setDate(showRecordStartTime.getDate() - 30);
+            break;
+        }
+    }
+    let showRecordStart = '';
+    let showRecordEnd = '';
+    if(showRecordStartTime !== null){
+        showRecordStart = format(showRecordStartTime, 'yyyy-MM-dd') + ' 00:00:00';
+    }
+    showRecordEnd  = format(now, 'yyyy-MM-dd') + ' 23:59:59';
+    return {showRecordStart, showRecordEnd};
 };
