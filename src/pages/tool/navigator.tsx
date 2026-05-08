@@ -7,6 +7,7 @@ import FileManagerScreen from '@/src/pages/tool/fileManager';
 import PregnancyScreen from '@/src/pages/tool/pregnancy';
 import DownloadScreen from '@/src/pages/tool/download';
 import SettingScreen from '@/src/pages/tool/setting';
+import SQLiteManagerScreen from '@/src/pages/tool/sqliteManager';
 
 
 const Tab = createBottomTabNavigator();
@@ -57,6 +58,16 @@ const ToolNavigator = () => {
                 title: '设置',
                 tabBarIcon: ({ color }) => (
                     <IconSymbol size={28} name="gearshape.fill" color={color} />
+                ),
+            }}
+        />
+        <Tab.Screen
+            name="sqliteManager"
+            component={SQLiteManagerScreen}
+            options={{
+                title: 'SQLite管理',
+                tabBarIcon: ({ color }) => (
+                    <IconSymbol size={28} name="server.rack" color={color} />
                 ),
             }}
         />
