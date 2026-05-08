@@ -65,7 +65,7 @@ export default function RecordScreen() {
         style: 'destructive',
         onPress: async () => {
           try {
-            const [success, error] = await exerciseService.deleteRecord(record.id);
+            const [success, error] = await exerciseService.deleteRecord(record);
             if (!success) {
               Alert.alert('失败', error);
               return;

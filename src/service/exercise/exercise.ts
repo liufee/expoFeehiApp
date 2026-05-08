@@ -39,7 +39,7 @@ export class ExerciseService {
   async saveRecord(record: Record): Promise<[boolean, string]> {
     try {
       console.log('开始保存记录...', record.type);
-      await this.initDB();
+
       console.log('数据库初始化完成');
 
       // 构建数据库记录对象
@@ -98,7 +98,7 @@ export class ExerciseService {
 
   async updateRecord(id: string, record: Record): Promise<[boolean, string]> {
     try {
-      await this.initDB();
+
 
       // 构建数据库记录对象
       const dbRecord: any = {
@@ -132,7 +132,8 @@ export class ExerciseService {
 
   async deleteRecord(record: Record): Promise<[boolean, string]> {
     try {
-      await this.initDB();
+
+      console.log(record)
       await exerciseDB.deleteRecord(record.id, 'exercise');
       return [true, ''];
     } catch (error) {
@@ -148,7 +149,7 @@ export class ExerciseService {
   async getRecordsByTypes(types: RecordType[]): Promise<[boolean, Record[], string]> {
     let records: Record[] = [];
     try {
-      await this.initDB();
+
       const recordTypes = types.map(t => t.toString());
       const rows = await exerciseDB.getRecordsByType(recordTypes, -1);
 
@@ -173,7 +174,7 @@ export class ExerciseService {
   ): Promise<[boolean, Record[], string]> {
     let records: Record[] = [];
     try {
-      await this.initDB();
+
       const recordTypes = types.map(t => t.toString());
       const rows = await exerciseDB.getRecordsByType(recordTypes, page, perPage, startTime, endTime, sortOrder);
 
@@ -197,7 +198,7 @@ export class ExerciseService {
     sortOrder: string = 'desc'
   ): Promise<[boolean, any[], string]> {
     try {
-      await this.initDB();
+
       const recordTypes = types.map(t => t.toString());
       const rows = await exerciseDB.getRecordsByType(recordTypes, page, perPage, startTime, endTime, sortOrder);
       return [true, rows, ''];
@@ -255,7 +256,7 @@ export class ExerciseService {
   async getRecordById(id: string): Promise<[boolean, Record | null, string]> {
     let record: Record | null = null;
     try {
-      await this.initDB();
+
       const row = await exerciseDB.getRecordById(id);
       if (!row) {
         return [true, null, ''];
@@ -270,7 +271,7 @@ export class ExerciseService {
 
   async getTSR(id: string): Promise<[boolean, string, string]> {
     try {
-      await this.initDB();
+
       const row = await exerciseDB.getTSR('exercise', id);
       if (!row) {
         return [false, '', ''];
@@ -284,7 +285,7 @@ export class ExerciseService {
 
   async assembleStrToCreateTSR(id: string): Promise<[boolean, string]> {
     try {
-      await this.initDB();
+
       const row = await exerciseDB.getRecordById(id);
       if (!row) {
         return [false, '记录不存在'];
