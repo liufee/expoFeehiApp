@@ -10,6 +10,8 @@ import SitupScreen from './situp';
 import RunScreen from './run';
 import RecordScreen from './record';
 import TSRVerifyScreen from './tsrVerify';
+import weiboService from "@/src/service/weibo";
+import {useSetting} from "@/src/provider";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -27,10 +29,13 @@ const RecordStack = () => {
 const ExerciseNavigator = () => {
   const [isReady, setIsReady] = useState(false);
 
+  const {setting} = useSetting();
+
   useEffect(() => {
     const initDB = async () => {
       try {
         await exerciseService.initDB();
+        exerciseService.setSetting(setting);
         setIsReady(true);
       } catch (error) {
         console.error('Failed to initialize database:', error);
