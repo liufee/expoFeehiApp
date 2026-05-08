@@ -131,8 +131,6 @@ export default function SQLiteManagerScreen() {
 
       // 获取所有表
       await loadTables(database);
-
-      Alert.alert('成功', `已加载数据库: ${fileName}`);
     } catch (error) {
       console.error('选择数据库失败:', error);
       Alert.alert('错误', '无法打开数据库文件');
@@ -201,7 +199,6 @@ export default function SQLiteManagerScreen() {
     setCurrentPage(0);
     setSortColumn(null);
     setSortOrder('ASC');
-    setShowTableList(false); // 选择表后隐藏表列表
     await loadTableData(tableName, 0);
   };
 
