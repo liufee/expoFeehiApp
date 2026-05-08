@@ -108,10 +108,14 @@ export default function AbdominalScreen() {
         setLoadingText('视频下载中...');
 
         try {
-
+            // 检查目录是否存在
+            const dirInfo = await FileSystem.getInfoAsync(dirPath);
             if (!dirInfo.exists) {
                 await FileSystem.makeDirectoryAsync(dirPath, { intermediates: true });
             }
+            
+            // 检查文件是否存在
+            const fileInfo = await FileSystem.getInfoAsync(localPath);
             if (fileInfo.exists) {
                 setVideoUri(localPath);
                 setLoading(false);
@@ -137,6 +141,8 @@ export default function AbdominalScreen() {
                 const downloadResult = await downloadResumable.downloadAsync();
                 if (downloadResult && downloadResult.uri) {
                     await FileSystem.moveAsync({ from: tempPath, to: localPath });
+                    // 检查移动后的文件是否存在
+                    const finalFileInfo = await FileSystem.getInfoAsync(localPath);
                     if (finalFileInfo.exists) {
                         setVideoUri(localPath);
                         setLoading(false);
