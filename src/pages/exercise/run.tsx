@@ -55,6 +55,7 @@ export default function RunScreen() {
 
   const [showAvgType, setShowAvgType] = useState(0);
   const allAvgPaceTypes = ['km/h', 'm/min', 'm/s'];
+  const [starting, setStarting] = useState(false); // 防止重复点击开始按钮
 
   const mapRef = useRef<MapView | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
@@ -63,6 +64,8 @@ export default function RunScreen() {
   const showAvgTypeRef = useRef(showAvgType);
   const startY = useRef(0);
   const triggered = useRef(false);
+  const initialPointsRef = useRef<Path[]>([]); // 用于收集初始定位点
+  const isLocationStableRef = useRef(false); // 标记定位是否已稳定
 
   // 更新 distanceRef 和 showAvgTypeRef
   useEffect(() => {
@@ -165,10 +168,53 @@ export default function RunScreen() {
 
   // 处理位置更新
   const handleLocationUpdate = (newPoint: Path) => {
+    // 如果定位还未稳定，收集初始点进行判断
+    if (!isLocationStableRef.current) {
+      initialPointsRef.current.push(newPoint);
+      
+      // 收集至少3个点后再判断稳定性
+      if (initialPointsRef.current.length >= 3) {
+        const points = initialPointsRef.current;
+        
+        // 计算最近3个点之间的平均距离
+        let totalDistance = 0;
+        for (let i = 1; i < points.length; i++) {
+          totalDistance += haversineDistance(
+            { latitude: points[i - 1].latitude, longitude: points[i - 1].longitude },
+            { latitude: points[i].latitude, longitude: points[i].longitude }
+          );
+        }
+        const avgDistance = totalDistance / (points.length - 1);
+        
+        console.log(`定位稳定性检查: 平均点间距 ${avgDistance.toFixed(2)}m`);
+        
+        // 如果平均点间距小于50米，认为定位已稳定
+        if (avgDistance < 50) {
+          isLocationStableRef.current = true;
+          // 使用最后一个点作为起点
+          lastPointRef.current = points[points.length - 1];
+          setPath([points[points.length - 1]]);
+          console.log('定位已稳定，开始记录');
+        } else {
+          // 如果还不稳定，清空重新收集
+          console.log('定位不稳定，继续等待...');
+          if (initialPointsRef.current.length > 6) {
+            // 最多收集6个点，如果还不稳定就强制使用最后一个点
+            isLocationStableRef.current = true;
+            lastPointRef.current = points[points.length - 1];
+            setPath([points[points.length - 1]]);
+            console.warn('定位超时，强制开始记录');
+          }
+        }
+      }
+      return; // 在定位稳定前不处理后续逻辑
+    }
+
+    // 定位稳定后，正常记录所有点
     setPath((prevPath) => {
       const updatedPath = [...prevPath, newPoint];
 
-      // 计算距离
+      // 计算累计距离
       if (lastPointRef.current) {
         const segmentDistance = haversineDistance(
           { latitude: lastPointRef.current.latitude, longitude: lastPointRef.current.longitude },
@@ -196,18 +242,32 @@ export default function RunScreen() {
 
   // 开始跑步
   const startRun = async () => {
-    const success = await startLocationTracking();
-    if (!success) return;
+    if (starting) return; // 防止重复点击
+    
+    setStarting(true);
+    try {
+      const success = await startLocationTracking();
+      if (!success) {
+        setStarting(false);
+        return;
+      }
 
-    setRunning(true);
-    setPath([]);
-    setDistance(0);
-    distanceRef.current = 0;
-    lastPointRef.current = null;
-    setStartTime(Date.now());
-    setEndTime(null);
-    setRunDuration('00:00:00');
-    setAvgPace(0);
+      // 重置定位稳定状态
+      initialPointsRef.current = [];
+      isLocationStableRef.current = false;
+      
+      setRunning(true);
+      setPath([]);
+      setDistance(0);
+      distanceRef.current = 0;
+      lastPointRef.current = null;
+      setStartTime(Date.now());
+      setEndTime(null);
+      setRunDuration('00:00:00');
+      setAvgPace(0);
+    } finally {
+      setStarting(false);
+    }
   };
 
   // 停止跑步
@@ -496,10 +556,11 @@ export default function RunScreen() {
       ) : (
         <>
           <TouchableOpacity
-            style={[styles.button, styles.startButton]}
+            style={[styles.button, styles.startButton, starting && { opacity: 0.5 }]}
             onPress={startRun}
+            disabled={starting}
           >
-            <Text style={styles.buttonText}>开始跑步</Text>
+            <Text style={styles.buttonText}>{starting ? '启动中...' : '开始跑步'}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.handInputButton, styles.manualButton]}
