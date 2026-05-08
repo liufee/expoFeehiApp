@@ -155,7 +155,6 @@ export default function AbdominalScreen() {
                 }
             }
         } catch (error) {
-
             setLoadingText(`下载失败: ${error.message || '未知错误'}`);
             setShowRetry(true);
             // 清理临时文件
