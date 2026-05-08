@@ -189,9 +189,20 @@ export default class WeiboService{
         let weibo:Weibo;
         try {
             let rows = await weiboDB.getWeibo(feedId);
+            let attachmentType = 'feed'; // 默认从 feeds 表
+            
+            // 如果在 feeds 表中没找到，尝试从 retweets 表中查找
+            if (!rows || rows.length === 0) {
+                rows = await weiboDB.getRetweetsCompatible([feedId]);
+                if (!rows || rows.length === 0) {
+                    return [false, weibo, '微博不存在'];
+                }
+                attachmentType = 'retweet'; // 从 retweets 表
+            }
+            
             let item = rows[0];
 
-            let attachmentsMap = await this.getAttachmentsMap('feed',[feedId]);
+            let attachmentsMap = await this.getAttachmentsMap(attachmentType, [feedId]);
             let repostMaps = await this.getRetweetsMap([item.retweet_id]);
             let biesMap = await this.getBiesMap();
             let usersMap = await this.getUsersMap([item.uid]);
@@ -700,23 +711,29 @@ export default class WeiboService{
                 };
             }
         }
+        
+        // 处理 retweets 表的兼容数据（可能缺少某些字段）
+        const retweetId = item.retweet_id || '';
+        const itemType = item.type !== undefined ? item.type : 1; // retweets 表默认 type=1
+        const tsr = item.tsr !== undefined ? item.tsr : 0; // retweets 表默认 tsr=0
+        
         return {
             id: item.id,
-            type:item.type,
+            type: itemType,
             text: this.getContent(item.content),
             media: attachmentsMap.has(item.id) ? attachmentsMap.get(item.id)! : [],
             comments: [],
-            forwardCount: item.repost_num,
-            likeCount: item.like_num,
-            commentCount: item.comment_num,
+            forwardCount: item.repost_num || 0,
+            likeCount: item.like_num || 0,
+            commentCount: item.comment_num || 0,
             createdAt: item.time.replace('+08:00', '').replace('+00:00', ''),
             uid: item.uid,
             user:usersMap.has(item.uid?.toString()) ? usersMap.get(item.uid?.toString())! : this.defaultUser,
-            repost: repostsMap.has(item.retweet_id) ? repostsMap.get(item.retweet_id)! : null,
-            retweet_id: item.retweet_id,
+            repost: retweetId && repostsMap.has(retweetId) ? repostsMap.get(retweetId)! : null,
+            retweet_id: retweetId,
             location: location,
-            by: biesMap.has(item.by_id.toString()) ? biesMap.get(item.by_id.toString())! : {'id':0, 'title':'', url:''},
-            tsr: item.tsr,
+            by: biesMap.has(item.by_id?.toString()) ? biesMap.get(item.by_id.toString())! : {'id':0, 'title':'', url:''},
+            tsr: tsr,
             tsrVerified: 1, // js 版本需要进入详情页再验证
         };
     }
