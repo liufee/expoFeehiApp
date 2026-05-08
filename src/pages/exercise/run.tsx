@@ -43,7 +43,7 @@ export default function RunScreen() {
   const [endTime, setEndTime] = useState<number | null>(null);
   const [distance, setDistance] = useState(0);
   const [runDuration, setRunDuration] = useState('00:00:00');
-  const [avgPace, setAvgPace] = useState(0);
+  const [avgPace, setAvgPace] = useState(0.00);
   const [segmentPace, setSegmentPace] = useState<Array<{ startTime: number; endTime: number; distance: number; avgPace: number }>>([]);
   const [showSummary, setShowSummary] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -224,7 +224,7 @@ export default function RunScreen() {
 
     // 计算最终的平均配速
     const tempAvgPace = calculateAverageSpeed(distance, etime - (startTime || 0), 0);
-    setAvgPace(tempAvgPace);
+    setAvgPace(parseFloat(tempAvgPace.toFixed(2)));
 
     // 计算分段配速
     const segmentPaceData = path.length > 0 ? calculateSegments(path) : [];
@@ -245,8 +245,8 @@ export default function RunScreen() {
         endAt: format(endTime as number, 'yyyy-MM-dd HH:mm:ss'),
         abdominal: {} as any,
         run: {
-          avgPace: avgPace,
-          distance: distance,
+          avgPace: parseFloat(avgPace.toFixed(2)),
+          distance: parseFloat(distance.toFixed(2)),
           runDuration: runDuration,
           runningWithoutPosition: 0,
           paths: path,
@@ -371,8 +371,8 @@ export default function RunScreen() {
       endAt: handInputEndAt,
       abdominal: {} as any,
       run: {
-        avgPace: 0,
-        distance: handInputDistance,
+        avgPace: 0.00,
+        distance: parseFloat(handInputDistance.toFixed(2)),
         runDuration: duration,
         runningWithoutPosition: 1,
         paths: [],
