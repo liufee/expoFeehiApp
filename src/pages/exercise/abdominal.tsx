@@ -55,14 +55,11 @@ export default function AbdominalScreen() {
     // 当视频URI设置后，延迟设置初始位置到第3秒
     useEffect(() => {
         if (videoUri && player && !hasEnded.current) {
-            console.log('视频URI已设置，准备设置初始位置');
             // 延迟设置 currentTime，确保视频元数据已加载
             const timer = setTimeout(() => {
-                console.log('设置视频初始位置到第3秒');
                 try {
                     player.currentTime = 3;
                 } catch (e) {
-                    console.error('设置初始位置失败:', e);
                 }
             }, 300);
 
@@ -106,42 +103,24 @@ export default function AbdominalScreen() {
         const localPath = `${dirPath}/keep_1_1.mp4`;
         const tempPath = `${localPath}.tmp`;
 
-        console.log('开始初始化视频...');
-        console.log('远程URL:', remoteUrl);
-        console.log('本地路径:', localPath);
-
         setShowRetry(false);
         setLoading(true);
         setLoadingText('视频下载中...');
 
         try {
-            // 确保目录存在
-            console.log('检查目录是否存在...');
-            const dirInfo = await FileSystem.getInfoAsync(dirPath);
-            console.log('目录信息:', dirInfo);
-            if (!dirInfo.exists) {
-                console.log('创建目录...');
-                await FileSystem.makeDirectoryAsync(dirPath, { intermediates: true });
-                console.log('目录创建成功');
-            }
 
-            // 检查文件是否存在
-            console.log('检查文件是否存在...');
-            const fileInfo = await FileSystem.getInfoAsync(localPath);
-            console.log('文件信息:', fileInfo);
+            if (!dirInfo.exists) {
+                await FileSystem.makeDirectoryAsync(dirPath, { intermediates: true });
+            }
             if (fileInfo.exists) {
-                console.log('文件已存在，直接使用');
                 setVideoUri(localPath);
                 setLoading(false);
             } else {
-                console.log('文件不存在，开始下载...');
                 // 删除可能存在的临时文件
                 const tempInfo = await FileSystem.getInfoAsync(tempPath);
                 if (tempInfo.exists) {
-                    console.log('清理旧临时文件');
                     await FileSystem.deleteAsync(tempPath);
                 }
-
                 // 下载视频 - 使用 downloadResumable 支持进度跟踪
                 const downloadResumable = FileSystem.createDownloadResumable(
                     remoteUrl,
@@ -150,36 +129,22 @@ export default function AbdominalScreen() {
                     (downloadProgress) => {
                         const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
                         const percent = (progress * 100).toFixed(0);
-                        console.log(`下载进度: ${percent}%`);
+
                         setLoadingText(`视频下载中... ${percent}%`);
                     }
                 );
 
-                console.log('开始下载...');
                 const downloadResult = await downloadResumable.downloadAsync();
-
-                console.log('下载完成，结果:', downloadResult);
-
                 if (downloadResult && downloadResult.uri) {
-                    console.log('移动文件到最终位置...');
                     await FileSystem.moveAsync({ from: tempPath, to: localPath });
-                    console.log('文件移动成功');
-
-                    // 验证文件是否真的存在
-                    const finalFileInfo = await FileSystem.getInfoAsync(localPath);
-                    console.log('最终文件信息:', finalFileInfo);
-
                     if (finalFileInfo.exists) {
-                        console.log('设置视频URI');
                         setVideoUri(localPath);
                         setLoading(false);
                     } else {
-                        console.error('文件移动后不存在');
                         setLoadingText('文件保存失败');
                         setShowRetry(true);
                     }
                 } else {
-                    console.error('下载失败，结果为空或没有uri');
                     setLoadingText('下载失败');
                     setShowRetry(true);
                     // 清理临时文件
@@ -190,8 +155,7 @@ export default function AbdominalScreen() {
                 }
             }
         } catch (error) {
-            console.error('视频下载错误:', error);
-            console.error('错误详情:', JSON.stringify(error));
+
             setLoadingText(`下载失败: ${error.message || '未知错误'}`);
             setShowRetry(true);
             // 清理临时文件
@@ -201,7 +165,6 @@ export default function AbdominalScreen() {
                     await FileSystem.deleteAsync(tempPath);
                 }
             } catch (e) {
-                console.error('清理临时文件失败:', e);
             }
         }
     };
@@ -232,7 +195,6 @@ export default function AbdominalScreen() {
             const newStartAt = new Date();
             setStartAt(newStartAt);
             startAtRef.current = newStartAt; // 同时更新 ref
-            console.log("记录了开始时间为", newStartAt)
             hasEnded.current = false;
         }
     };
@@ -241,7 +203,6 @@ export default function AbdominalScreen() {
         if (currentAction < actions.length - 1 && currentAction !== -1 && player) {
             const nextActionIndex = currentAction + 1;
             const nextStartTime = actions[nextActionIndex].start;
-            console.log(`跳转到下一个动作: ${actions[nextActionIndex].name}, 时间: ${nextStartTime}秒`);
             setShowSkipRest(false);
             player.currentTime = nextStartTime;
             setCurrentAction(nextActionIndex);
@@ -252,7 +213,6 @@ export default function AbdominalScreen() {
         if (currentAction > 0 && currentAction !== -1 && player) {
             const prevActionIndex = currentAction - 1;
             const prevStartTime = actions[prevActionIndex].start;
-            console.log(`跳转到上一个动作: ${actions[prevActionIndex].name}, 时间: ${prevStartTime}秒`);
             setShowSkipRest(false);
             player.currentTime = prevStartTime;
             setCurrentAction(prevActionIndex);
@@ -261,7 +221,6 @@ export default function AbdominalScreen() {
 
     const handleProgress = ({ positionMillis }: { positionMillis: number }) => {
         const currentTime = positionMillis / 1000;
-
         for (let i = 0; i < actions.length - 1; i++) {
             if (currentTime > actions[i].end && currentTime < actions[i + 1].start - 2) {
                 // 在第一个结尾，第二个开始之前
@@ -281,12 +240,8 @@ export default function AbdominalScreen() {
     // 监听播放器状态
     useEffect(() => {
         if (!player) return;
-
-        console.log('注册播放器事件监听器');
-
         // iOS 和 Android 通用：监听视频播放完成事件（最可靠的方式）
         const playToEndSubscription = player.addListener('playToEnd', () => {
-            console.log('视频播放完成（playToEnd 事件），调用 handleEnd');
             handleEnd();
         });
 
@@ -295,7 +250,6 @@ export default function AbdominalScreen() {
         });
 
         return () => {
-            console.log('移除播放器事件监听器');
             playToEndSubscription.remove();
         };
     }, [player, currentAction]);
@@ -316,14 +270,14 @@ export default function AbdominalScreen() {
 
         // 确保 startAt 已设置，如果未设置则返回错误
         if (!actualStartAt) {
-            console.error('startAt 未设置，无法保存记录');
+
             Alert.alert('错误', '开始时间未设置，请重新开始锻炼');
             return false;
         }
 
         setSaving(true); // 开始保存，设置 loading 状态
         const endAt = new Date();
-        console.log("start at", actualStartAt, "end_at", endAt)
+
         const record = {
             type: RecordType.RecordTypeAbdominal,
             startAt: format(actualStartAt, 'yyyy-MM-dd HH:mm:ss'),
@@ -337,7 +291,6 @@ export default function AbdominalScreen() {
         try {
             const [success, error] = await exerciseService.saveRecord(record);
             if (!success) {
-                console.error('保存腹肌记录失败:', error);
                 Alert.alert('失败', error);
                 return false;
             }
@@ -349,14 +302,12 @@ export default function AbdominalScreen() {
                     player.currentTime = 3; // 重置到3秒
                 }
             } catch (e) {
-                console.log('播放器已释放，跳过重置');
             }
             setShowSkipRest(false);
             // 移除这里的 hasEnded.current = true，移到 handleEnd 中统一设置
             await refreshRecords();
             return true;
         } catch (error) {
-            console.error('保存腹肌记录异常:', error);
             Alert.alert('失败', '保存记录失败');
             return false;
         } finally {
@@ -365,12 +316,9 @@ export default function AbdominalScreen() {
     };
 
     const autoSaveSitUpPushUpRecord = async () => {
-        console.log('开始保存力量记录, saving状态:', saving);
         if (saving) {
-            console.log('正在保存中，跳过力量记录保存');
             return;
         }
-
         const endAt = new Date();
         const record = {
             type: RecordType.RecordTypeSitUpPushUp,
@@ -386,21 +334,16 @@ export default function AbdominalScreen() {
                 legsUpTheWallPose: 3,
             },
         };
-
-        console.log('力量记录数据:', record);
         setSaving(true); // 开始保存
         try {
             const [success, error] = await exerciseService.saveRecord(record);
-            console.log('力量记录保存结果:', success, error);
             if (!success) {
                 Alert.alert('失败', error);
                 return;
             }
             await refreshRecords();
-            console.log('力量记录保存成功');
             Alert.alert('成功', '保存成功');
         } catch (error) {
-            console.error('力量记录保存异常:', error);
             Alert.alert('失败', '保存记录失败');
         } finally {
             setSaving(false); // 保存完成
@@ -408,25 +351,15 @@ export default function AbdominalScreen() {
     };
 
     const handleEnd = async () => {
-        console.log('handleEnd 被调用, hasEnded:', hasEnded.current, 'saving:', saving);
         if (hasEnded.current || saving) {
-            console.log('handleEnd 提前返回');
             return;
         }
-        
-        console.log('开始保存腹肌记录');
         // 先保存腹肌记录（不设置 hasEnded）
         await saveAbdominalRecord(Status.StatusFinished);
-        console.log('腹肌记录保存完成');
-        
-        console.log('开始保存力量记录');
         // 再保存力量记录
         await autoSaveSitUpPushUpRecord();
-        console.log('力量记录保存完成');
-        
         // 最后设置结束标志
         hasEnded.current = true;
-        console.log('handleEnd 完成');
     };
 
     const handleManualEnd = async () => {
@@ -444,12 +377,10 @@ export default function AbdominalScreen() {
                 player.currentTime = 3; // 重置到3秒
             }
         } catch (e) {
-            console.log('播放器已释放，跳过重置');
         }
         setCurrentAction(-1);
         setStartAt(null);
         startAtRef.current = null; // 同时重置 ref
-        console.log('重置 start at---------...');
         setShowSkipRest(false);
         hasEnded.current = false;
     };
