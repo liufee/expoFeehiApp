@@ -19,15 +19,12 @@ export default function SystemInfoModal({ visible, onClose }: SystemInfoModalPro
 
     const infoItems = [
         { label: '发布时间', value: BUILD_INFO.publishTime, icon: '🚀' },
-        { label: 'Git Branch', value: BUILD_INFO.gitBranch, icon: '🌿' },
-        { label: 'Git Commit', value: BUILD_INFO.gitCommit, icon: '📝' },
+        { label: 'Git Commit', value: BUILD_INFO.gitCommit + ' ' + BUILD_INFO.gitBranch, icon: '📝' },
         { label: 'Commit 时间', value: BUILD_INFO.gitCommitTime, icon: '🕐' },
-        { label: '应用版本', value: Constants.expoConfig?.version, icon: '📱' },
+        { label: '应用版本', value: Constants.expoConfig?.name + ' ' + Constants.expoConfig?.version, icon: '📱' },
         { label: 'React Native', value: getReactNativeVersion(), icon: '⚛️' },
         { label: '平台', value: `${Platform.OS} ${Platform.Version}`, icon: '📲' },
         { label: 'Expo SDK', value: Constants.expoConfig?.sdkVersion, icon: '🔧' },
-        { label: '应用名称', value: Constants.expoConfig?.name, icon: '🏷️' },
-        { label: '架构', value: Constants.expoConfig?.newArchEnabled ? '新架构' : '旧架构', icon: '🏗️' },
         { label: '开发模式', value: __DEV__ ? '开发环境' : '生产环境', icon: '🔨' },
     ];
 

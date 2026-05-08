@@ -162,7 +162,7 @@ const SettingsScreen = () => {
     }, []);
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             <ScrollView>
                 <Text style={styles.header}>应用设置</Text>
                 {/* 数据库设置 */}
@@ -377,7 +377,8 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        paddingHorizontal: 12,
+        paddingVertical: 20,
     },
     header: {
         fontSize: 24,
