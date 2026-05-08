@@ -114,7 +114,7 @@ const TSRVerify = ({formula, createdAt, getFullOriginalString, getTSR}: Props) =
 
                             showToast({message: '保存中...'});
                             const originFile = new File(DownloadPath, 'origin_str.txt');
-                            originFile.write(fullOriginalString);
+                            await originFile.write(fullOriginalString);
                             showToast({message: `已经保存到${originFile.uri}`});
                         } catch (error) {
                             console.error('保存原串失败:', error);
