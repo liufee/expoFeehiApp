@@ -1,10 +1,12 @@
 import { exerciseDB } from '@/src/db/exercise';
 import { Record, RecordType, Status, DailyExercise, Run, Path } from './model';
-import {calculateHash, generateTSR} from '@/src/util/tsr';
+import {generateTSR} from '@/src/util/tsr';
+import {Setting} from '../setting/types';
 
 export class ExerciseService {
   private static instance: ExerciseService;
   private dbInitialized = false;
+  private setting: Setting;
 
   private constructor() {}
 
@@ -13,6 +15,10 @@ export class ExerciseService {
       ExerciseService.instance = new ExerciseService();
     }
     return ExerciseService.instance;
+  }
+
+  public setSetting(setting: Setting): void {
+    this.setting = setting;
   }
 
   async initDB(): Promise<void> {
@@ -64,9 +70,8 @@ export class ExerciseService {
         dbRecord.paths = pathStr;
       }
 
-      // 生成 TSR（如果启用）
-      const enableTSR = true; // 可以从配置中读取
-      if (enableTSR) {
+      // 生成 TSR(如果启用)
+      if (this.setting.exercise.enableTSR) {
         console.log('开始生成 TSR...');
         const originStr = this.assembleStrToCreateTSRByRecord(dbRecord);
         const [result, info] = await generateTSR(originStr);
@@ -107,9 +112,8 @@ export class ExerciseService {
         paths: '',
       };
 
-      // 生成 TSR（如果启用）
-      const enableTSR = false; // 可以从配置中读取
-      if (enableTSR) {
+      // 生成 TSR(如果启用)
+      if (this.setting.exercise.enableTSR) {
         const originStr = this.assembleStrToCreateTSRByRecord(dbRecord);
         const [result, info] = await generateTSR(originStr);
         if (!result) {

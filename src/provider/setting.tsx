@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { Setting } from '../service/setting/types';
 import defaultSetting from '../service/setting/defaultSetting';
 import SettingService from '../service/setting/setting';
+import { ExerciseService } from '../service/exercise/exercise';
 
 interface SettingContextType {
   setting: Setting;
@@ -40,6 +41,12 @@ export const SettingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [success, error] = await settingService.updateSetting(newSetting);
     if (success) {
       setSetting(newSetting);
+      // 通知 exercise service 更新 setting
+      try {
+        ExerciseService.getInstance().setSetting(newSetting);
+      } catch (e) {
+        console.warn('Failed to set setting to ExerciseService:', e);
+      }
     }
     return [success, error];
   }, []);

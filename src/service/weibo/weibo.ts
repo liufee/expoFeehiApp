@@ -17,13 +17,12 @@ import {
 import {userErrorMessage} from '../../util';
 import {weiboDB} from "@/src/db/weibo";
 import {Setting} from "@/src/service/setting/types";
-import defaultSetting from "@/src/service/setting/defaultSetting";
-import {calculateHash, digestMedia, generateTSR} from "@/src/util/tsr";
+import {digestMedia, generateTSR} from "@/src/util/tsr";
 
 export default class WeiboService{
     private dbInitialized = false;
     private static instance: WeiboService;
-    private setting: Setting = defaultSetting;
+    private setting: Setting;
 
     private constructor() {}
 
