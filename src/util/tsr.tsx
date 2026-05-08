@@ -1,5 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { File } from 'expo-file-system';
+import config from '@/src/config';
 
 export const calculateHash = async (data, tp) => {
   const hash = await Crypto.digestStringAsync(
@@ -12,9 +13,7 @@ export const calculateHash = async (data, tp) => {
 
 export async function generateTSR(data: string): Promise<[boolean, string]> {
   try {
-    const baseUrl = 'http://gcp.feehi.com:8081/tool/generate-tsr';
-
-    const response = await fetch(baseUrl, {
+    const response = await fetch(config.cfApiBaseURL+'/tool/generate-tsr', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +35,7 @@ export async function generateTSR(data: string): Promise<[boolean, string]> {
 
 export async function parseTSR(data: string): Promise<[boolean, any]> {
   try {
-    const baseUrl = 'http://gcp.feehi.com:8081/tool/parse-tsr';
+    const baseUrl = config.cfApiBaseURL+'/tool/parse-tsr';
 
     const response = await fetch(baseUrl, {
       method: 'POST',

@@ -44,7 +44,7 @@ const WeiboNavigator = () => {
         title: '热搜',
         headerShown:false,
         tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="search" color={color} />
+            <IconSymbol size={28} name="magnifyingglass" color={color} />
         ),
     }} />
     */
@@ -52,7 +52,7 @@ const WeiboNavigator = () => {
         <Tab.Navigator>
             <Tab.Screen  name="index" component={WeiboIndexStack} options={{
                 tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="sina.weibo" color={color} />
+                    <IconSymbol size={28} name="paperplane.fill" color={color} />
                 ),
                 tabBarLabel: '微博',
                 title:'微博',
@@ -68,7 +68,7 @@ const WeiboNavigator = () => {
             />
             <Tab.Screen  name="search" component={WeiboSearchStack} options={{
                 tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="search" color={color} />
+                    <IconSymbol size={28} name="magnifyingglass" color={color} />
                 ),
                 tabBarLabel: '搜索',
                 title:'搜索',

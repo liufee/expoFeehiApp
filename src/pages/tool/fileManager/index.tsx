@@ -1108,8 +1108,8 @@ export default function FileManagerScreen() {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
+        <View style={styles.syncModalOverlay}>
+          <View style={[styles.syncModalContent, { backgroundColor: '#FFFFFF' }]}>
             <Text style={[styles.modalTitle, { color: themeColors.text }]}>新建文件夹</Text>
             <TextInput
               style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.text }]}
@@ -1188,8 +1188,8 @@ export default function FileManagerScreen() {
           setNewName('');
         }}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
+        <View style={styles.syncModalOverlay}>
+          <View style={[styles.syncModalContent, { backgroundColor: '#FFFFFF' }]}>
             <Text style={[styles.modalTitle, { color: themeColors.text }]}>重命名</Text>
             <TextInput
               style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.text }]}
