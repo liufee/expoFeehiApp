@@ -34,16 +34,21 @@ try {
     console.log('无法获取git branch信息');
 }
 
-// 获取当前时间（发布时间）
-const publishTime = new Date().toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-});
+// 获取当前时间（发布时间），格式与git commit时间保持一致
+let publishTime = 'unknown';
+try {
+    publishTime = execSync('date +"%Y-%m-%d %H:%M:%S"').toString().trim();
+} catch (e) {
+    // 如果date命令失败，使用JavaScript格式化
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    publishTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
 
 // 生成配置文件内容
 const configContent = `// 此文件由 scripts/generate-build-info.js 自动生成
