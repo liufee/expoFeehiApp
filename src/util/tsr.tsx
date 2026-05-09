@@ -91,7 +91,7 @@ const digestMediaV1 = async (mediaStr) => {
 }
 
 const digestMediaV2 = async (mediaStr) => {
-  return [true, mediaStr];//todo
+  return [true, mediaStr];//expo go 没有相关 api，到其他平台查看 tsr
 }
 
 const digestMediaV3 = async (mediaStr) => {
