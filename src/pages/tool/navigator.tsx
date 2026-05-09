@@ -42,6 +42,16 @@ const ToolNavigator = () => {
             }}
         />
         <Tab.Screen
+            name="sqliteManager"
+            component={SQLiteManagerScreen}
+            options={{
+                title: 'SQLite管理',
+                tabBarIcon: ({ color }) => (
+                    <IconSymbol size={28} name="tablecells.fill" color={color} />
+                ),
+            }}
+        />
+        <Tab.Screen
             name="download"
             component={DownloadScreen}
             options={{
@@ -58,16 +68,6 @@ const ToolNavigator = () => {
                 title: '设置',
                 tabBarIcon: ({ color }) => (
                     <IconSymbol size={28} name="gearshape.fill" color={color} />
-                ),
-            }}
-        />
-        <Tab.Screen
-            name="sqliteManager"
-            component={SQLiteManagerScreen}
-            options={{
-                title: 'SQLite管理',
-                tabBarIcon: ({ color }) => (
-                    <IconSymbol size={28} name="tablecells.fill" color={color} />
                 ),
             }}
         />

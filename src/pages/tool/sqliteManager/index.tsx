@@ -120,14 +120,16 @@ export default function SQLiteManagerScreen() {
   };
 
   // 选择数据库文件
-  const selectDatabase = async (fileUri: string, fileName: string) => {
+  const selectDatabase = async (dbDirectory: string, dbFileName: string) => {
     try {
       setLoading(true);
 
-      console.log('选择的数据库文件:', fileName, fileUri);
+      // 去掉文件扩展名，获取数据库名称
+      const dbName = dbFileName.replace(/\.(db|sqlite|sqlite3)$/i, '');
+      console.log('选择的数据库:', dbName, '目录:', dbDirectory);
 
-      // 打开数据库连接
-      const database = await SQLite.openDatabaseAsync(fileUri);
+      // 打开数据库连接，参数顺序：数据库名称, options, 目录路径
+      const database = await SQLite.openDatabaseAsync(dbName, undefined, dbDirectory);
       setDb(database);
 
       // 获取所有表
@@ -591,8 +593,8 @@ export default function SQLiteManagerScreen() {
                       // 是文件夹
                       navigateToFolder(item.uri);
                     } else {
-                      // 是数据库文件
-                      selectDatabase(item.uri, item.name);
+                      // 是数据库文件，传递当前目录和文件名
+                      selectDatabase(currentPath, item.name);
                     }
                   }}
                 >
