@@ -128,7 +128,17 @@ export default class WeiboService{
     public async deleteWeibo(weibo:Weibo):Promise<[boolean, string]>{
         try {
             for (let i in weibo.media) {
-                const path = weibo.media[i].Origin;
+                let path = weibo.media[i].Origin;
+
+                if (path.startsWith('http')) {
+                    continue;
+                }
+
+                if (!path.startsWith(AppWeiboBasePath) && !path.startsWith(AppWeiboLargeBasePath)) {
+                    const basePath = weibo.media[i].IsLarge === 1 ? AppWeiboLargeBasePath : AppWeiboBasePath;
+                    path = basePath + '/' + path;
+                }
+
                 const file = new File(path);
                 if (file.exists) {
                     file.delete();
@@ -190,7 +200,7 @@ export default class WeiboService{
         try {
             let rows = await weiboDB.getWeibo(feedId);
             let attachmentType = 'feed'; // 默认从 feeds 表
-            
+
             // 如果在 feeds 表中没找到，尝试从 retweets 表中查找
             if (!rows || rows.length === 0) {
                 rows = await weiboDB.getRetweetsCompatible([feedId]);
@@ -199,7 +209,7 @@ export default class WeiboService{
                 }
                 attachmentType = 'retweet'; // 从 retweets 表
             }
-            
+
             let item = rows[0];
 
             let attachmentsMap = await this.getAttachmentsMap(attachmentType, [feedId]);
@@ -711,12 +721,12 @@ export default class WeiboService{
                 };
             }
         }
-        
+
         // 处理 retweets 表的兼容数据（可能缺少某些字段）
         const retweetId = item.retweet_id || '';
         const itemType = item.type !== undefined ? item.type : 1; // retweets 表默认 type=1
         const tsr = item.tsr !== undefined ? item.tsr : 0; // retweets 表默认 tsr=0
-        
+
         return {
             id: item.id,
             type: itemType,
