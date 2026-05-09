@@ -7,6 +7,7 @@ interface ToastConfig {
   type?: 'success' | 'error' | 'info' | 'warning';
   duration?: number;
   backgroundColor?: string;
+  autoHide?: boolean;
 }
 
 interface ToastContextType {
@@ -29,6 +30,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [message, setMessage] = useState('');
   const [type, setType] = useState<'success' | 'error' | 'info' | 'warning'>('success');
   const [customBackgroundColor, setCustomBackgroundColor] = useState<string | null>(null);
+  const [autoHide, setAutoHide] = useState(true);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-50)).current;
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -44,12 +46,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const showToast = useCallback((config: ToastConfig) => {
     // 清除之前的定时器
     if (timerRef.current) {
-      clearTimeout(timerRef.current);
+      clearTimeout(timerRef.current as any);
     }
 
     setMessage(config.message);
     setType(config.type || 'success');
     setCustomBackgroundColor(config.backgroundColor || null);
+    setAutoHide(config.autoHide ?? true);
     setVisible(true);
 
     // 显示动画
@@ -66,11 +69,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }),
     ]).start();
 
-    // 自动隐藏
-    const duration = config.duration || 2000;
-    timerRef.current = setTimeout(() => {
-      hideToast();
-    }, duration);
+    // 自动隐藏（只有当 autoHide 为 true 时才设置定时器）
+    const shouldAutoHide = config.autoHide ?? true;
+    if (shouldAutoHide) {
+      const duration = config.duration || 2000;
+      timerRef.current = setTimeout(() => {
+        hideToast();
+      }, duration) as any;
+    }
   }, [fadeAnim, slideAnim]);
 
   const hideToast = useCallback(() => {
@@ -126,6 +132,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           <TouchableOpacity onPress={hideToast} style={styles.content}>
             <Text style={styles.message}>{message}</Text>
           </TouchableOpacity>
+          {/* 右上角关闭按钮 - 仅在 autoHide 为 false 时显示 */}
+          {!autoHide && (
+            <TouchableOpacity onPress={hideToast} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>×</Text>
+            </TouchableOpacity>
+          )}
         </Animated.View>
       )}
     </ToastContext.Provider>
@@ -153,5 +165,19 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     textAlign: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });
