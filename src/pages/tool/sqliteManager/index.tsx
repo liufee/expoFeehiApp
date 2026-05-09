@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   Platform,
   StatusBar,
@@ -20,6 +19,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import * as SQLite from 'expo-sqlite';
 import { Directory, File } from 'expo-file-system';
 import { AppDBBasePath } from '@/constants';
+import { useToast } from '@/src/provider/toast';
 
 interface TableInfo {
   name: string;
@@ -48,6 +48,7 @@ export default function SQLiteManagerScreen() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? 'light'];
   const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
 
   const [db, setDb] = useState<SQLite.SQLiteDatabase | null>(null);
   const [tables, setTables] = useState<TableInfo[]>([]);
@@ -80,7 +81,7 @@ export default function SQLiteManagerScreen() {
       const directory = new Directory(path);
 
       if (!directory.exists) {
-        Alert.alert('错误', '目录不存在');
+        showToast({ message: '目录不存在', backgroundColor: 'red' });
         setLoading(false);
         return;
       }
@@ -112,7 +113,7 @@ export default function SQLiteManagerScreen() {
       setDbFiles(dbFileItems);
     } catch (error) {
       console.error('加载数据库文件失败:', error);
-      Alert.alert('错误', '加载文件列表失败');
+      showToast({ message: '加载文件列表失败', backgroundColor: 'red' });
     } finally {
       setLoading(false);
     }
@@ -133,7 +134,7 @@ export default function SQLiteManagerScreen() {
       await loadTables(database);
     } catch (error) {
       console.error('选择数据库失败:', error);
-      Alert.alert('错误', '无法打开数据库文件');
+      showToast({ message: '无法打开数据库文件', backgroundColor: 'red' });
     } finally {
       setLoading(false);
     }
@@ -189,7 +190,7 @@ export default function SQLiteManagerScreen() {
       setTables(tableInfos);
     } catch (error) {
       console.error('加载表列表失败:', error);
-      Alert.alert('错误', '无法加载表列表');
+      showToast({ message: '无法加载表列表', backgroundColor: 'red' });
     }
   };
 
@@ -241,7 +242,7 @@ export default function SQLiteManagerScreen() {
 
     } catch (error) {
       console.error('加载表数据失败:', error);
-      Alert.alert('错误', '无法加载表数据');
+      showToast({ message: '无法加载表数据', backgroundColor: 'red' });
     } finally {
       setLoading(false);
     }
@@ -331,7 +332,7 @@ export default function SQLiteManagerScreen() {
   // 执行自定义查询
   const executeCustomQuery = async () => {
     if (!db || !customQuery.trim()) {
-      Alert.alert('错误', '请输入SQL查询语句');
+      showToast({ message: '请输入SQL查询语句', backgroundColor: 'red' });
       return;
     }
 
@@ -340,7 +341,7 @@ export default function SQLiteManagerScreen() {
       // 检查是否是SELECT查询
       const queryUpper = customQuery.trim().toUpperCase();
       if (!queryUpper.startsWith('SELECT')) {
-        Alert.alert('提示', '为了安全起见，只允许执行SELECT查询');
+        showToast({ message: '为了安全起见，只允许执行SELECT查询', backgroundColor: 'orange' });
         setLoading(false);
         return;
       }
@@ -366,7 +367,7 @@ export default function SQLiteManagerScreen() {
       setShowQueryModal(false);
     } catch (error) {
       console.error('执行查询失败:', error);
-      Alert.alert('错误', `查询执行失败: ${error instanceof Error ? error.message : String(error)}`);
+      showToast({ message: `查询执行失败: ${error instanceof Error ? error.message : String(error)}`, backgroundColor: 'red' });
     } finally {
       setLoading(false);
     }

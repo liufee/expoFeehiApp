@@ -22,6 +22,7 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import JSZip from 'jszip';
 import {router} from "expo-router";
+import { useToast } from '@/src/provider/toast';
 
 interface FileItem {
   name: string;
@@ -35,6 +36,7 @@ export default function FileManagerScreen() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? 'light'];
   const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
 
   const [currentPath, setCurrentPath] = useState<string>(Paths.document.uri);
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -57,7 +59,7 @@ export default function FileManagerScreen() {
     try {
       const directory = new Directory(currentPath);
       if (!directory.exists) {
-        Alert.alert('错误', '当前路径无效');
+        showToast({ message: '当前路径无效', backgroundColor: 'red' });
         setLoading(false);
         return;
       }
@@ -89,7 +91,7 @@ export default function FileManagerScreen() {
       setFiles(fileItems);
     } catch (error) {
       console.error('加载文件失败:', error);
-      Alert.alert('错误', '加载文件列表失败');
+      showToast({ message: '加载文件列表失败', backgroundColor: 'red' });
     } finally {
       setLoading(false);
     }
@@ -142,7 +144,7 @@ export default function FileManagerScreen() {
 
   const createFolder = async () => {
     if (!newFolderName.trim()) {
-      Alert.alert('错误', '请输入文件夹名称');
+      showToast({ message: '请输入文件夹名称', backgroundColor: 'red' });
       return;
     }
 
@@ -150,7 +152,7 @@ export default function FileManagerScreen() {
       const newFolder = new Directory(currentPath, newFolderName);
 
       if (newFolder.exists) {
-        Alert.alert('错误', '文件夹已存在');
+        showToast({ message: '文件夹已存在', backgroundColor: 'red' });
         return;
       }
 
@@ -158,10 +160,10 @@ export default function FileManagerScreen() {
       setNewFolderName('');
       setModalVisible(false);
       await loadFiles();
-      Alert.alert('成功', '文件夹创建成功');
+      showToast({ message: '文件夹创建成功' });
     } catch (error) {
       console.error('创建文件夹失败:', error);
-      Alert.alert('错误', '创建文件夹失败');
+      showToast({ message: '创建文件夹失败', backgroundColor: 'red' });
     }
   };
 
@@ -206,10 +208,10 @@ export default function FileManagerScreen() {
               }
 
               await loadFiles();
-              Alert.alert('成功', '删除成功');
+              showToast({ message: '删除成功' });
             } catch (error) {
               console.error('删除失败:', error);
-              Alert.alert('错误', `删除失败: ${error instanceof Error ? error.message : String(error)}`);
+              showToast({ message: `删除失败: ${error instanceof Error ? error.message : String(error)}`, backgroundColor: 'red' });
             }
           },
         },
@@ -224,7 +226,7 @@ export default function FileManagerScreen() {
 
   const renameItem_execute = async () => {
     if (!renameItem || !newName.trim()) {
-      Alert.alert('错误', '请输入新名称');
+      showToast({ message: '请输入新名称', backgroundColor: 'red' });
       return;
     }
 
@@ -246,30 +248,30 @@ export default function FileManagerScreen() {
       setRenameItem(null);
       setNewName('');
       await loadFiles();
-      Alert.alert('成功', '重命名成功');
+      showToast({ message: '重命名成功' });
     } catch (error) {
       console.error('重命名失败:', error);
-      Alert.alert('错误', '重命名失败');
+      showToast({ message: '重命名失败', backgroundColor: 'red' });
     }
   };
 
   const shareFile = async (item: FileItem) => {
     if (item.isDirectory) {
-      Alert.alert('提示', '暂不支持分享文件夹');
+      showToast({ message: '暂不支持分享文件夹', backgroundColor: 'orange' });
       return;
     }
 
     try {
       const canShare = await Sharing.isAvailableAsync();
       if (!canShare) {
-        Alert.alert('错误', '分享功能不可用');
+        showToast({ message: '分享功能不可用', backgroundColor: 'red' });
         return;
       }
 
       await Sharing.shareAsync(item.uri);
     } catch (error) {
       console.error('分享失败:', error);
-      Alert.alert('错误', '分享失败');
+      showToast({ message: '分享失败', backgroundColor: 'red' });
     }
   };
 
@@ -315,7 +317,7 @@ export default function FileManagerScreen() {
       }
     } catch (error) {
       console.error('导入失败:', error);
-      Alert.alert('错误', '导入失败');
+      showToast({ message: '导入失败', backgroundColor: 'red' });
     }
   };
 
@@ -325,10 +327,10 @@ export default function FileManagerScreen() {
       const destFile = new File(destPath);
       sourceFile.copy(destFile);
       await loadFiles();
-      Alert.alert('成功', '导入成功');
+      showToast({ message: '导入成功' });
     } catch (error) {
       console.error('复制文件失败:', error);
-      Alert.alert('错误', '导入失败');
+      showToast({ message: '导入失败', backgroundColor: 'red' });
     }
   };
 
@@ -366,7 +368,7 @@ export default function FileManagerScreen() {
     } catch (error) {
       console.error('解压 ZIP 文件失败:', error);
       setExtractProgress({visible: false, current: 0, total: 0, currentFile: ''});
-      Alert.alert('错误', `解压失败: ${error instanceof Error ? error.message : String(error)}`);
+      showToast({ message: `解压失败: ${error instanceof Error ? error.message : String(error)}`, backgroundColor: 'red' });
     } finally {
       setLoading(false);
     }
@@ -406,7 +408,7 @@ export default function FileManagerScreen() {
     } catch (error) {
       console.error('处理ZIP文件失败:', error);
       setExtractProgress({visible: false, current: 0, total: 0, currentFile: ''});
-      Alert.alert('错误', `解压失败: ${error instanceof Error ? error.message : String(error)}`);
+      showToast({ message: `解压失败: ${error instanceof Error ? error.message : String(error)}`, backgroundColor: 'red' });
     } finally {
       setLoading(false);
     }
@@ -511,7 +513,7 @@ export default function FileManagerScreen() {
 
       setExtractProgress({visible: false, current: 0, total: 0, currentFile: ''});
       await loadFiles();
-      Alert.alert('成功', `ZIP 文件解压并导入成功，共 ${fileCount} 个文件`);
+      showToast({ message: `ZIP 文件解压并导入成功，共 ${fileCount} 个文件` });
     } catch (error) {
       console.error('解压失败:', error);
       setExtractProgress({visible: false, current: 0, total: 0, currentFile: ''});
@@ -775,7 +777,7 @@ export default function FileManagerScreen() {
                 try {
                   const canShare = await Sharing.isAvailableAsync();
                   if (!canShare) {
-                    Alert.alert('错误', '分享功能不可用');
+                    showToast({ message: '分享功能不可用', backgroundColor: 'red' });
                     return;
                   }
 
@@ -784,7 +786,7 @@ export default function FileManagerScreen() {
                   await Sharing.shareAsync(cleanUri);
                 } catch (error) {
                   console.error('分享文件夹失败:', error);
-                  Alert.alert('错误', '分享失败');
+                  showToast({ message: '分享失败', backgroundColor: 'red' });
                 }
               },
             },
@@ -794,14 +796,14 @@ export default function FileManagerScreen() {
         // 对于文件，直接分享
         const canShare = await Sharing.isAvailableAsync();
         if (!canShare) {
-          Alert.alert('错误', '分享功能不可用');
+          showToast({ message: '分享功能不可用', backgroundColor: 'red' });
           return;
         }
         await Sharing.shareAsync(item.uri);
       }
     } catch (error) {
       console.error('导出失败:', error);
-      Alert.alert('错误', '导出失败');
+      showToast({ message: '导出失败', backgroundColor: 'red' });
     }
   };
 
@@ -828,7 +830,7 @@ export default function FileManagerScreen() {
       setIsScanning(false);
 
       if (totalFiles === 0) {
-        Alert.alert('提示', '没有需要同步的文件');
+        showToast({ message: '没有需要同步的文件', backgroundColor: 'orange' });
         return;
       }
 
@@ -849,7 +851,7 @@ export default function FileManagerScreen() {
     } catch (error) {
       setIsScanning(false);
       console.error('扫描服务器失败:', error);
-      Alert.alert('错误', `扫描服务器失败: ${error instanceof Error ? error.message : String(error)}`);
+      showToast({ message: `扫描服务器失败: ${error instanceof Error ? error.message : String(error)}`, backgroundColor: 'red' });
     }
   };
 
@@ -991,11 +993,11 @@ export default function FileManagerScreen() {
       // 刷新文件列表
       await loadFiles();
 
-      Alert.alert('同步完成', `成功: ${syncedCount} 个文件\n失败: ${failedCount} 个文件`);
+      showToast({ message: `同步完成\n成功: ${syncedCount} 个文件\n失败: ${failedCount} 个文件` });
     } catch (error) {
       console.error('同步失败:', error);
       setSyncProgress({visible: false, current: 0, total: 0, currentFile: '', status: ''});
-      Alert.alert('错误', `同步失败: ${error instanceof Error ? error.message : String(error)}`);
+      showToast({ message: `同步失败: ${error instanceof Error ? error.message : String(error)}`, backgroundColor: 'red' });
     }
   };
 
