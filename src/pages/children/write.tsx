@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BabyEventItem from './components/BabyEventItem';
 import {format} from 'date-fns';
@@ -16,6 +16,7 @@ import {
     SleepEvent,
     Event,
 } from '@/src/service/children/model';
+import { useToast } from '@/src/provider/toast';
 
 const poopTypes = ['软','稀','硬'];
 const poopColors = ['黄','棕','绿'];
@@ -123,6 +124,7 @@ function LabeledInput({ label, value, onChange, placeholder, keyboardType='defau
 
 export default function Write(){
     const insets = useSafeAreaInsets();
+    const { showToast } = useToast();
     const [child,setChild] = useState('son');
     const [eventType,setEventType] = useState(EventType.Eat);
     const [events,setEvents] = useState<any[]>([]);
@@ -158,7 +160,7 @@ export default function Write(){
             5
         );
         if(!success) {
-            Alert.alert('提示', '获取 events 错误:' + err);
+            showToast({ message: '获取 events 错误:' + err, backgroundColor: 'red' });
             return;
         }
         setEvents(items);
@@ -166,7 +168,7 @@ export default function Write(){
 
     const createEvent = async ()=>{
         if ( !(eventType in newBornEvents) ){
-            Alert.alert('提示', '未知 event type ' + eventType);
+            showToast({ message: '未知 event type ' + eventType, backgroundColor: 'red' });
             return;
         }
         let event:BaseEvent = {
@@ -182,7 +184,7 @@ export default function Write(){
             case EventType.Eat:
                 const amount = Number(eatAmount);
                 if(amount <= 0){
-                    Alert.alert('提示', 'amount 错误');
+                    showToast({ message: 'amount 错误', backgroundColor: 'red' });
                     return;
                 }
                 event = {
@@ -223,7 +225,7 @@ export default function Write(){
         }
         const [success, err] = await childrenService.createEvent(event as Event);
         if(!success){
-            Alert.alert('提示', '保存失败:' + err);
+            showToast({ message: '保存失败:' + err, backgroundColor: 'red' });
             return;
         }
         setStartTime(new Date());
@@ -238,7 +240,7 @@ export default function Write(){
 
         setCryLevel(cryLevels[0]);
 
-        Alert.alert('提示', '保存成功');
+        showToast({ message: '保存成功' });
         await loadEvents();
     };
 

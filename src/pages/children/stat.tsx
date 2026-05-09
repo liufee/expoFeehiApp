@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
     View,
-    Alert, TextInput,
+    TextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BabyEventItem from './components/BabyEventItem';
@@ -17,6 +17,7 @@ import EventStatCard from './components/EventStatCard';
 import {format} from 'date-fns';
 import { childrenService } from '@/src/service/children/children';
 import {childrenList, EventType, newBornEvents, Event} from '@/src/service/children/model';
+import { useToast } from '@/src/provider/toast';
 
 const TIME_OPTIONS = {
     'day': '📅 今天',
@@ -107,6 +108,7 @@ function DateInput({ label, value, onChange }: {label: string, value: Date, onCh
 // ========== 主页面 ==========
 export default function Stat() {
     const insets = useSafeAreaInsets();
+    const { showToast } = useToast();
     const [events, setEvents] = useState<any[]>([]);
     const [selectedChild, setSelectedChild] = useState('son');
     const [filterType, setFilterType] = useState('yesterday');
@@ -130,7 +132,7 @@ export default function Stat() {
             -1
         );
         if(!success) {
-            Alert.alert('提示', '获取 events 错误:' + err);
+            showToast({ message: '获取 events 错误:' + err, backgroundColor: 'red' });
             return;
         }
         setEvents(items);
