@@ -7,6 +7,7 @@ import { exerciseService } from '@/src/service/exercise/exercise';
 import { Record, RecordType, Status } from '@/src/service/exercise/model';
 import * as FileSystem from 'expo-file-system/legacy';
 import {APPRuntimePath} from "@/constants";
+import { useToast } from '@/src/provider/toast';
 
 const { width } = Dimensions.get('window');
 
@@ -31,6 +32,7 @@ const actions = [
 
 export default function AbdominalScreen() {
     const insets = useSafeAreaInsets();
+    const { showToast } = useToast();
     const [paused, setPaused] = useState(true);
     const [muted, setMuted] = useState(false);
     const [showSkipRest, setShowSkipRest] = useState(false);
@@ -73,7 +75,7 @@ export default function AbdominalScreen() {
         try {
             const [success, rows, error] = await exerciseService.getRecordsByPage([RecordType.RecordTypeAbdominal], 1, 12, '', '', 'desc');
             if (!success) {
-                Alert.alert('失败', error);
+                showToast({ message: error, backgroundColor: 'red' });
                 return;
             }
             const records = rows.map((row: any) => {
@@ -93,7 +95,7 @@ export default function AbdominalScreen() {
             setList(records);
         } catch (error) {
             console.error('获取腹肌记录失败:', error);
-            Alert.alert('失败', '获取记录失败');
+            showToast({ message: '获取记录失败', backgroundColor: 'red' });
         }
     };
 
@@ -274,8 +276,7 @@ export default function AbdominalScreen() {
 
         // 确保 startAt 已设置，如果未设置则返回错误
         if (!actualStartAt) {
-
-            Alert.alert('错误', '开始时间未设置，请重新开始锻炼');
+            showToast({ message: '开始时间未设置，请重新开始锻炼', backgroundColor: 'red' });
             return false;
         }
 
@@ -295,7 +296,7 @@ export default function AbdominalScreen() {
         try {
             const [success, error] = await exerciseService.saveRecord(record);
             if (!success) {
-                Alert.alert('失败', error);
+                showToast({ message: error, backgroundColor: 'red' });
                 return false;
             }
             setCurrentAction(-1);
@@ -312,7 +313,7 @@ export default function AbdominalScreen() {
             await refreshRecords();
             return true;
         } catch (error) {
-            Alert.alert('失败', '保存记录失败');
+            showToast({ message: '保存记录失败', backgroundColor: 'red' });
             return false;
         } finally {
             setSaving(false); // 保存完成，取消 loading 状态
@@ -342,13 +343,13 @@ export default function AbdominalScreen() {
         try {
             const [success, error] = await exerciseService.saveRecord(record);
             if (!success) {
-                Alert.alert('失败', error);
+                showToast({ message: error, backgroundColor: 'red' });
                 return;
             }
             await refreshRecords();
-            Alert.alert('成功', '保存成功');
+            showToast({ message: '保存成功' });
         } catch (error) {
-            Alert.alert('失败', '保存记录失败');
+            showToast({ message: '保存记录失败', backgroundColor: 'red' });
         } finally {
             setSaving(false); // 保存完成
         }

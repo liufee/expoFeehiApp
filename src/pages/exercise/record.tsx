@@ -18,11 +18,13 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useNavigation } from '@react-navigation/native';
 import { useSetting } from '@/src/provider/setting';
 import { getShowRecordStartAndEndTime } from './utils';
+import { useToast } from '@/src/provider/toast';
 
 export default function RecordScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const { setting } = useSetting();
+  const { showToast } = useToast();
   const [menuVisible, setMenuVisible] = useState(false);
   const [records, setRecords] = useState<DailyExercise[]>([]);
   const [showType, setShowType] = useState('list');
@@ -38,12 +40,12 @@ export default function RecordScreen() {
         'desc'
       );
       if (!success) {
-        Alert.alert('失败', error);
+        showToast({ message: error, backgroundColor: 'red' });
         return;
       }
       setRecords(dailyExercises);
     } catch (error) {
-      Alert.alert('失败', '获取记录失败');
+      showToast({ message: '获取记录失败', backgroundColor: 'red' });
     }
   };
 
@@ -61,13 +63,13 @@ export default function RecordScreen() {
           try {
             const [success, error] = await exerciseService.deleteRecord(record);
             if (!success) {
-              Alert.alert('失败', error);
+              showToast({ message: error, backgroundColor: 'red' });
               return;
             }
-            Alert.alert('成功', '删除成功');
+            showToast({ message: '删除成功' });
             await refreshRecord();
           } catch (error) {
-            Alert.alert('失败', '删除失败');
+            showToast({ message: '删除失败', backgroundColor: 'red' });
           }
         },
       },

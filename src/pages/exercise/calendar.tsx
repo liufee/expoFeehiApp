@@ -7,6 +7,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Record as RecordModel, RecordType} from '../../service/exercise/model';
 import {exerciseService} from '../../service/exercise/exercise';
 import {IconSymbol} from "@/components/ui/icon-symbol";
+import { useToast } from '@/src/provider/toast';
 
 interface RecordsByDate{
   date:string,
@@ -15,6 +16,7 @@ interface RecordsByDate{
 
 const calendar = ({records}:{records:RecordsByDate[]}) => {
   const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
   const [selectedDate, setSelectedDate] = useState<RecordsByDate|null>(null);
   const navigation = useNavigation();
 
@@ -72,9 +74,10 @@ const calendar = ({records}:{records:RecordsByDate[]}) => {
         onPress: async () => {
           const[success, err] = await exerciseService.deleteRecord(record);
           if(!success){
-            Alert.alert('失败', err);
+            showToast({ message: err, backgroundColor: 'red' });
             return;
           }
+          showToast({ message: '删除成功' });
         },
       },
     ]);

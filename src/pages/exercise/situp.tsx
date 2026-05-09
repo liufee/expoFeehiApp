@@ -4,9 +4,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { addMinutes, format, isValid, parse } from 'date-fns';
 import { exerciseService } from '@/src/service/exercise/exercise';
 import { Record, RecordType, Status } from '@/src/service/exercise/model';
+import { useToast } from '@/src/provider/toast';
 
 export default function SitupScreen() {
   const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
   const now = new Date();
   const initEnd = addMinutes(now, 90);
   const [startTime, setStartTime] = useState(format(now, 'yyyy-MM-dd HH:mm:ss'));
@@ -34,7 +36,7 @@ export default function SitupScreen() {
 
       if (!success) {
         console.error('获取力量记录失败:', error);
-        Alert.alert('失败', error);
+        showToast({ message: error, backgroundColor: 'red' });
         return;
       }
 
@@ -54,7 +56,7 @@ export default function SitupScreen() {
       }
     } catch (error) {
       console.error('获取力量记录异常:', error);
-      Alert.alert('失败', '获取记录失败');
+      showToast({ message: '获取记录失败', backgroundColor: 'red' });
     }
   };
 
@@ -67,13 +69,13 @@ export default function SitupScreen() {
     
     let parsedDate = parse(startTime, 'yyyy-MM-dd HH:mm:ss', new Date());
     if (!isValid(parsedDate)) {
-      Alert.alert('错误', '开始时间格式错误: ' + startTime);
+      showToast({ message: '开始时间格式错误: ' + startTime, backgroundColor: 'red' });
       return;
     }
 
     parsedDate = parse(endTime, 'yyyy-MM-dd HH:mm:ss', new Date());
     if (!isValid(parsedDate)) {
-      Alert.alert('错误', '结束时间格式错误: ' + endTime);
+      showToast({ message: '结束时间格式错误: ' + endTime, backgroundColor: 'red' });
       return;
     }
 
@@ -93,23 +95,23 @@ export default function SitupScreen() {
         const [success, error] = await exerciseService.updateRecord(existingRecordId, record);
         if (!success) {
           console.error('更新力量记录失败:', error);
-          Alert.alert('失败', error);
+          showToast({ message: error, backgroundColor: 'red' });
           return;
         }
-        Alert.alert('成功', '修改成功');
+        showToast({ message: '修改成功' });
       } else {
         const [success, error] = await exerciseService.saveRecord(record);
         if (!success) {
           console.error('保存力量记录失败:', error);
-          Alert.alert('失败', error);
+          showToast({ message: error, backgroundColor: 'red' });
           return;
         }
-        Alert.alert('成功', '保存成功');
+        showToast({ message: '保存成功' });
       }
       await initTodaySitUpPushUp();
     } catch (error) {
       console.error('保存力量记录异常:', error);
-      Alert.alert('失败', '保存记录失败');
+      showToast({ message: '保存记录失败', backgroundColor: 'red' });
     } finally {
       setSaving(false); // 保存完成
     }

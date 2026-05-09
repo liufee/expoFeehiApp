@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useToast } from '@/src/provider/toast';
 // 条件导入 react-native-maps，仅在非 Web 平台
 let MapView: any;
 let Polyline: any;
@@ -37,6 +38,7 @@ const USE_EXPO_LOCATION = false;
 
 export default function RunScreen() {
   const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
   const [running, setRunning] = useState(false);
   const [path, setPath] = useState<Path[]>([]);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -320,12 +322,12 @@ export default function RunScreen() {
       const [success, message] = await exerciseService.saveRecord(record);
 
       if (!success) {
-        Alert.alert('失败', message || '保存记录失败');
+        showToast({ message: message || '保存记录失败', backgroundColor: 'red' });
         return;
       }
 
       setShowSummary(false);
-      Alert.alert('成功', '保存成功');
+      showToast({ message: '保存成功' });
 
       // 重置状态
       setPath([]);
@@ -337,7 +339,7 @@ export default function RunScreen() {
       setSegmentPace([]);
     } catch (error) {
       console.error('Failed to save record:', error);
-      Alert.alert('失败', '保存记录失败');
+      showToast({ message: '保存记录失败', backgroundColor: 'red' });
     } finally {
       setSaving(false);
     }
@@ -406,14 +408,14 @@ export default function RunScreen() {
     // 验证开始时间
     let parsedDate = parse(handInputStartAt, 'yyyy-MM-dd HH:mm:ss', new Date());
     if (!isValid(parsedDate)) {
-      Alert.alert('错误', '开始时间格式不正确: ' + handInputStartAt);
+      showToast({ message: '开始时间格式不正确: ' + handInputStartAt, backgroundColor: 'red' });
       return;
     }
 
     // 验证结束时间
     parsedDate = parse(handInputEndAt, 'yyyy-MM-dd HH:mm:ss', new Date());
     if (!isValid(parsedDate)) {
-      Alert.alert('错误', '结束时间格式不正确: ' + handInputEndAt);
+      showToast({ message: '结束时间格式不正确: ' + handInputEndAt, backgroundColor: 'red' });
       return;
     }
 
@@ -448,15 +450,15 @@ export default function RunScreen() {
       const [success, message] = await exerciseService.saveRecord(record);
 
       if (!success) {
-        Alert.alert('失败', message || '保存记录失败');
+        showToast({ message: message || '保存记录失败', backgroundColor: 'red' });
         return;
       }
 
       setShowHandInput(false);
-      Alert.alert('成功', '保存成功');
+      showToast({ message: '保存成功' });
     } catch (error) {
       console.error('Failed to save record:', error);
-      Alert.alert('失败', '保存记录失败');
+      showToast({ message: '保存记录失败', backgroundColor: 'red' });
     } finally {
       setSaving(false); // 保存完成
     }
