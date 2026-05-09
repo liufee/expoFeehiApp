@@ -10,6 +10,7 @@ import React, {useEffect, useState} from 'react';
 import {Weibo} from '../../../service/weibo/model';
 import {formatNewsContent, formatWeiboContent} from '../util';
 import WeiboService from '../../../service/weibo';
+import { useToast } from '../../../provider/toast';
 import {Media} from './Media';
 import { useNavigation } from '@react-navigation/native';
 
@@ -35,6 +36,7 @@ export const WeiboItem = ({ item, uid, onDelete, refresh, forwarded = false, pag
     const [selectedAction, setSelectedAction] = useState<ActionType>('comment');
 
     const weiboService = WeiboService.getInstance();
+    const { showToast } = useToast();
     const navigation = useNavigation<any>();
 
     useEffect(()=>{
