@@ -21,6 +21,8 @@ config.resolver.extraNodeModules = {
     'react-native': path.resolve(projectRoot, 'node_modules/react-native'),
 };
 
+config.resolver.sourceExts.unshift('expo.js', 'expo.ts', 'expo.tsx');
+
 // 重点：允许 Metro 解析 .wasm 文件作为静态资源
 config.resolver.assetExts.push('wasm');
 
