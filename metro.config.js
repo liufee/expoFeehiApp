@@ -5,9 +5,10 @@ const path = require('path');
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 const projectRoot = __dirname;
+const feehiAppProject = path.resolve(projectRoot, '../FeehiApp');
 
 config.watchFolders = [
-    '/Users/lf/work/js/FeehiApp/src',
+    path.resolve(feehiAppProject, 'src'),
 ];
 
 config.resolver.unstable_enableSymlinks = true;
