@@ -11,8 +11,6 @@ config.watchFolders = [
     path.resolve(feehiAppProject, 'src'),
 ];
 
-config.resolver.unstable_enableSymlinks = true;
-
 config.resolver.nodeModulesPaths = [
     path.resolve(projectRoot, 'node_modules'),
 ];

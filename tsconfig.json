@@ -7,7 +7,7 @@
         "./*"
       ],
       "@feehi/*": [
-        "src/feehi/*"
+        "./src/feehi/*"
       ]
     }
   },
